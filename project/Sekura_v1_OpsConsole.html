@@ -1,0 +1,1595 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sekura — Monitoreo geoespacial de garantías rurales</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0B0F14;
+    --panel: #11161D;
+    --panelHi: #161D26;
+    --panel2: #0E141B;
+    --line: #1E2630;
+    --lineHi: #2A3340;
+    --text: #D8E0EA;
+    --textDim: #7A8694;
+    --textFaint: #4A5462;
+    --cyan: #3DD9D6;
+    --cyanDim: #1F8B8A;
+    --amber: #E8A93C;
+    --red: #E5484D;
+    --green: #3DD978;
+    --violet: #9B7EE8;
+    --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    --sans: 'Inter', -apple-system, system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 13px;
+    overflow: hidden;
+  }
+
+  /* ===== APP SHELL ===== */
+  .app { display: flex; flex-direction: column; height: 100vh; }
+  .topbar {
+    height: 44px; display: flex; align-items: center; gap: 16px;
+    padding: 0 12px; background: var(--panel);
+    border-bottom: 1px solid var(--line);
+    font-family: var(--mono); font-size: 11px;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 10px; height: 100%;
+    padding-right: 16px; border-right: 1px solid var(--line);
+  }
+  .brand-mark {
+    width: 22px; height: 22px; background: var(--cyan); color: var(--bg);
+    display: grid; place-items: center; font-weight: 700; border-radius: 3px;
+    font-family: var(--mono); font-size: 12px;
+  }
+  .brand-name { font-family: var(--sans); font-size: 14px; font-weight: 600; letter-spacing: 0.04em; }
+  .brand-ver { color: var(--textFaint); font-size: 10px; letter-spacing: 0.1em; }
+  .topnav { display: flex; height: 100%; }
+  .topnav button {
+    background: none; border: none; color: var(--textDim);
+    padding: 0 14px; height: 100%; cursor: pointer;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+    border-bottom: 2px solid transparent;
+  }
+  .topnav button:hover { color: var(--text); }
+  .topnav button.active { color: var(--cyan); border-bottom-color: var(--cyan); }
+  .topbar .right { margin-left: auto; display: flex; align-items: center; gap: 12px; color: var(--textDim); }
+  .pulse {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--green);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(61,217,120,0.5); }
+    70% { box-shadow: 0 0 0 6px rgba(61,217,120,0); }
+    100% { box-shadow: 0 0 0 0 rgba(61,217,120,0); }
+  }
+  .lang { display: flex; border: 1px solid var(--line); }
+  .lang button {
+    padding: 3px 8px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em;
+    background: transparent; color: var(--textDim); border: none; cursor: pointer; text-transform: uppercase;
+  }
+  .lang button.active { background: var(--cyan); color: var(--bg); }
+  .user-tag { font-family: var(--mono); font-size: 10px; letter-spacing: 0.04em; }
+
+  /* ===== BODY LAYOUT ===== */
+  .body { flex: 1; display: flex; min-height: 0; }
+  .sidebar {
+    width: 56px; background: var(--panel); border-right: 1px solid var(--line);
+    display: flex; flex-direction: column; align-items: center; padding: 12px 0; gap: 6px;
+  }
+  .side-btn {
+    width: 40px; height: 40px; background: none; border: 1px solid transparent; cursor: pointer;
+    color: var(--textDim); border-radius: 4px; display: grid; place-items: center;
+    transition: all 0.15s;
+  }
+  .side-btn:hover { color: var(--text); background: var(--panelHi); }
+  .side-btn.active { color: var(--cyan); border-color: var(--cyan); background: var(--panelHi); }
+  .side-btn svg { width: 18px; height: 18px; stroke-width: 1.5; }
+  .side-spacer { flex: 1; }
+  .side-label {
+    font-family: var(--mono); font-size: 8px; letter-spacing: 0.14em; color: var(--textFaint);
+    text-transform: uppercase; writing-mode: vertical-rl; transform: rotate(180deg); margin: 8px 0;
+  }
+
+  .main { flex: 1; min-width: 0; overflow: auto; display: flex; flex-direction: column; }
+
+  /* ===== PANEL HEADERS ===== */
+  .panel-head {
+    height: 36px; padding: 0 16px; display: flex; align-items: center; gap: 10px;
+    border-bottom: 1px solid var(--line); background: var(--panel);
+    font-family: var(--mono); font-size: 11px; color: var(--textDim); letter-spacing: 0.08em;
+    flex-shrink: 0;
+  }
+  .panel-head .tok { color: var(--cyan); }
+  .panel-head .right { margin-left: auto; display: flex; gap: 12px; align-items: center; color: var(--textFaint); }
+
+  /* ===== METRICS ===== */
+  .metrics {
+    display: grid; grid-template-columns: repeat(6, 1fr); border-bottom: 1px solid var(--line);
+    flex-shrink: 0;
+  }
+  .metric { padding: 14px 16px; border-right: 1px solid var(--line); }
+  .metric:last-child { border-right: none; }
+  .metric .lbl {
+    font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--textFaint); margin-bottom: 6px;
+  }
+  .metric .val { font-family: var(--mono); font-size: 22px; font-weight: 500; color: var(--text); }
+  .metric .val.cyan { color: var(--cyan); }
+  .metric .val.amber { color: var(--amber); }
+  .metric .val.red { color: var(--red); }
+  .metric .val.green { color: var(--green); }
+  .metric .sub { font-family: var(--mono); font-size: 10px; color: var(--textDim); margin-top: 4px; }
+
+  /* ===== ACTION BAR ===== */
+  .action-bar {
+    display: flex; align-items: center; gap: 8px; padding: 12px 16px;
+    border-bottom: 1px solid var(--line); background: var(--panel); flex-wrap: wrap; flex-shrink: 0;
+  }
+  .btn {
+    background: var(--cyan); color: var(--bg); border: none; padding: 7px 14px;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase;
+    cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn:hover { background: #4FE5E2; }
+  .btn.ghost { background: transparent; color: var(--text); border: 1px solid var(--line); font-weight: 400; }
+  .btn.ghost:hover { border-color: var(--cyan); color: var(--cyan); }
+  .btn.blue { background: #4A90E2; color: var(--bg); }
+  .btn svg { width: 12px; height: 12px; stroke-width: 2; }
+
+  /* ===== FILTER CHIPS ===== */
+  .filter-bar {
+    display: flex; gap: 6px; padding: 10px 16px; border-bottom: 1px solid var(--line);
+    background: var(--panel); align-items: center; flex-wrap: wrap; flex-shrink: 0;
+  }
+  .filter-bar .lbl-mono {
+    font-family: var(--mono); font-size: 10px; color: var(--textFaint); letter-spacing: 0.14em;
+    text-transform: uppercase; margin-right: 4px;
+  }
+  .chip {
+    padding: 4px 10px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em;
+    text-transform: uppercase; background: transparent; color: var(--textDim);
+    border: 1px solid var(--line); cursor: pointer;
+  }
+  .chip:hover { color: var(--text); border-color: var(--lineHi); }
+  .chip.active { background: var(--cyan); color: var(--bg); border-color: var(--cyan); }
+  .chip .ct { opacity: 0.6; margin-left: 4px; }
+  .filter-sep { width: 1px; height: 18px; background: var(--line); margin: 0 6px; }
+
+  /* ===== TABLES ===== */
+  table.t { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 11px; }
+  table.t th {
+    text-align: left; padding: 8px 12px; font-size: 9px; letter-spacing: 0.12em;
+    color: var(--textFaint); text-transform: uppercase; font-weight: 500;
+    background: var(--panel); border-bottom: 1px solid var(--line);
+    position: sticky; top: 0;
+  }
+  table.t td {
+    padding: 9px 12px; border-bottom: 1px solid var(--line); color: var(--text);
+  }
+  table.t tr.click { cursor: pointer; }
+  table.t tr.click:hover td { background: var(--panelHi); }
+  table.t .dim { color: var(--textDim); }
+  table.t .faint { color: var(--textFaint); }
+  table.t .cyan { color: var(--cyan); }
+  .right-align { text-align: right; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase;
+    border: 1px solid; border-radius: 0;
+  }
+  .badge.ok { color: var(--green); border-color: rgba(61,217,120,0.4); background: rgba(61,217,120,0.08); }
+  .badge.watch { color: var(--amber); border-color: rgba(232,169,60,0.4); background: rgba(232,169,60,0.08); }
+  .badge.breach { color: var(--red); border-color: rgba(229,72,77,0.4); background: rgba(229,72,77,0.08); }
+  .badge.cyan { color: var(--cyan); border-color: rgba(61,217,214,0.4); background: rgba(61,217,214,0.08); }
+  .badge.violet { color: var(--violet); border-color: rgba(155,126,232,0.4); background: rgba(155,126,232,0.08); }
+
+  .risk-bar {
+    display: inline-block; width: 32px; height: 4px; background: var(--line);
+    margin-right: 6px; vertical-align: middle; position: relative;
+  }
+  .risk-bar > span {
+    position: absolute; left: 0; top: 0; height: 100%;
+  }
+
+  /* ===== TWO COL ===== */
+  .two-col { display: grid; grid-template-columns: 1.4fr 1fr; border-bottom: 1px solid var(--line); }
+  .two-col > div:first-child { border-right: 1px solid var(--line); }
+
+  /* ===== HEX MAP ===== */
+  .hex-wrap { padding: 16px; display: grid; grid-template-columns: 1fr 200px; gap: 16px; }
+  .hex-list-h {
+    font-family: var(--mono); font-size: 9px; color: var(--textFaint);
+    letter-spacing: 0.14em; margin-bottom: 8px; text-transform: uppercase;
+  }
+  .hex-row {
+    padding: 6px 8px; font-family: var(--mono); font-size: 11px; cursor: pointer;
+    display: flex; justify-content: space-between; color: var(--text);
+    border-left: 2px solid transparent;
+  }
+  .hex-row:hover { background: var(--panelHi); }
+  .hex-row.active { color: var(--cyan); border-left-color: var(--cyan); background: var(--panelHi); }
+  .hex-row .dim { color: var(--textDim); }
+
+  /* ===== DETECTION CHART ===== */
+  .det-wrap { padding: 16px; }
+  .det-row {
+    display: grid; grid-template-columns: 110px 1fr 60px; gap: 8px;
+    align-items: center; font-family: var(--mono); font-size: 11px; padding: 4px 0;
+  }
+  .det-row .dim { color: var(--textDim); }
+  .det-bar { height: 6px; background: var(--line); position: relative; }
+  .det-bar > span { position: absolute; left: 0; top: 0; height: 100%; }
+
+  /* ===== EMPTY STATE ===== */
+  .empty {
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 40px 20px; text-align: center; color: var(--textDim);
+  }
+  .empty .ico {
+    width: 80px; height: 80px; border: 2px solid var(--cyan); border-radius: 50%;
+    display: grid; place-items: center; margin-bottom: 24px; color: var(--cyan);
+    box-shadow: 0 0 40px rgba(61,217,214,0.2);
+  }
+  .empty .ico svg { width: 36px; height: 36px; }
+  .empty h2 { font-family: var(--sans); font-size: 18px; font-weight: 600; color: var(--text); margin: 0 0 8px; }
+  .empty p { font-family: var(--mono); font-size: 11px; max-width: 460px; line-height: 1.6; margin: 0 0 24px; }
+  .empty-links { display: flex; gap: 8px; }
+
+  /* ===== SCANNER ===== */
+  .scanner-hero {
+    padding: 32px 32px 0; display: flex; flex-direction: column; align-items: center; gap: 16px;
+    border-bottom: 1px solid var(--line); background: linear-gradient(180deg, var(--panel) 0%, var(--bg) 100%);
+  }
+  .scanner-ico {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, var(--cyan), var(--cyanDim));
+    display: grid; place-items: center; color: var(--bg);
+    box-shadow: 0 0 50px rgba(61,217,214,0.3);
+  }
+  .scanner-ico svg { width: 28px; height: 28px; stroke-width: 2; }
+  .scanner-title { font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
+  .scanner-sub { font-family: var(--mono); font-size: 11px; color: var(--textDim); text-align: center; max-width: 540px; line-height: 1.5; padding-bottom: 16px; }
+  .scanner-tabs { display: flex; gap: 0; padding: 0 32px; border-bottom: 1px solid var(--line); background: var(--panel); flex-shrink: 0; }
+  .scanner-tabs button {
+    background: none; border: none; color: var(--textDim); padding: 12px 18px; cursor: pointer;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+    border-bottom: 2px solid transparent;
+  }
+  .scanner-tabs button:hover { color: var(--text); }
+  .scanner-tabs button.active { color: var(--cyan); border-bottom-color: var(--cyan); }
+
+  .scanner-body { padding: 32px; max-width: 880px; }
+  .input-row { display: flex; gap: 8px; margin-bottom: 24px; }
+  .input-mono {
+    flex: 1; background: var(--panel); border: 1px solid var(--line); color: var(--text);
+    padding: 10px 14px; font-family: var(--mono); font-size: 13px; outline: none;
+    transition: border 0.15s;
+  }
+  .input-mono:focus { border-color: var(--cyan); }
+  .sample-block {
+    border: 1px solid rgba(61,217,214,0.3); background: rgba(61,217,214,0.05);
+    padding: 14px 16px;
+  }
+  .sample-block h4 {
+    font-family: var(--mono); font-size: 10px; color: var(--cyan); letter-spacing: 0.14em;
+    text-transform: uppercase; margin: 0 0 10px;
+  }
+  .sample-list { display: flex; flex-direction: column; gap: 6px; }
+  .sample-item {
+    background: var(--panel); padding: 8px 12px; cursor: pointer; font-family: var(--mono);
+    font-size: 11px; color: var(--text); border: 1px solid var(--line);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .sample-item:hover { border-color: var(--cyan); background: var(--panelHi); }
+  .sample-item .dim { color: var(--textDim); font-size: 10px; }
+
+  .dropzone {
+    border: 1.5px dashed var(--lineHi); padding: 48px 24px; text-align: center;
+    background: var(--panel); transition: all 0.15s; cursor: pointer;
+  }
+  .dropzone:hover, .dropzone.over { border-color: var(--cyan); background: var(--panelHi); }
+  .dropzone svg { width: 32px; height: 32px; color: var(--cyan); margin-bottom: 14px; }
+  .dropzone .t { font-size: 14px; margin-bottom: 6px; }
+  .dropzone .s { font-family: var(--mono); font-size: 10px; color: var(--textDim); letter-spacing: 0.06em; }
+
+  /* ===== CNPJ RESULT ===== */
+  .breadcrumb {
+    font-family: var(--mono); font-size: 10px; color: var(--textDim); letter-spacing: 0.08em;
+    padding: 12px 16px; border-bottom: 1px solid var(--line); background: var(--panel);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .breadcrumb a { color: var(--cyan); text-decoration: none; cursor: pointer; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .breadcrumb .sep { color: var(--textFaint); }
+
+  .entity-head { padding: 24px 24px 16px; border-bottom: 1px solid var(--line); }
+  .entity-head h1 { font-size: 24px; font-weight: 600; margin: 0 0 6px; letter-spacing: -0.01em; }
+  .entity-head .meta { font-family: var(--mono); font-size: 11px; color: var(--textDim); }
+
+  .entity-metrics {
+    display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 1px solid var(--line);
+  }
+
+  .conn-card { padding: 16px; border-bottom: 1px solid var(--line); }
+  .conn-card h3 { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--textFaint); margin: 0 0 12px; }
+
+  /* ===== CAR DETAIL ===== */
+  .car-head {
+    display: flex; align-items: center; justify-content: space-between; padding: 16px 24px;
+    border-bottom: 1px solid var(--line); gap: 16px; flex-wrap: wrap;
+  }
+  .car-head .left h1 { font-family: var(--mono); font-size: 14px; margin: 0 0 4px; color: var(--cyan); }
+  .car-head .left .sub { font-size: 13px; color: var(--text); margin-bottom: 4px; }
+  .car-head .left .sicar { font-family: var(--mono); font-size: 10px; color: var(--cyan); cursor: pointer; }
+  .car-head .left .sicar:hover { text-decoration: underline; }
+  .car-head .actions { display: flex; gap: 8px; }
+
+  .car-metrics {
+    display: grid; grid-template-columns: repeat(6, 1fr); border-bottom: 1px solid var(--line);
+  }
+  .car-metric { padding: 14px 16px; border-right: 1px solid var(--line); }
+  .car-metric:last-child { border-right: none; }
+  .car-metric .lbl { font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--textFaint); margin-bottom: 6px; }
+  .car-metric .val { font-family: var(--mono); font-size: 16px; font-weight: 500; color: var(--text); }
+  .car-metric .sub { font-family: var(--mono); font-size: 10px; color: var(--textDim); margin-top: 3px; }
+
+  .audit-strip {
+    display: grid; grid-template-columns: repeat(3, 1fr); border-bottom: 1px solid var(--line);
+  }
+  .audit-card { padding: 16px; border-right: 1px solid var(--line); }
+  .audit-card:last-child { border-right: none; }
+  .audit-card .code { font-family: var(--mono); font-size: 10px; color: var(--textFaint); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 4px; }
+  .audit-card .name { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+  .audit-card .desc { font-size: 11px; color: var(--textDim); margin-bottom: 12px; line-height: 1.5; }
+
+  .subtabs { display: flex; padding: 0 16px; border-bottom: 1px solid var(--line); background: var(--panel); flex-shrink: 0; }
+  .subtabs button {
+    background: none; border: none; color: var(--textDim); padding: 12px 16px; cursor: pointer;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+    border-bottom: 2px solid transparent;
+  }
+  .subtabs button:hover { color: var(--text); }
+  .subtabs button.active { color: var(--cyan); border-bottom-color: var(--cyan); }
+
+  .checkpoint-list { padding: 0; }
+  .checkpoint {
+    display: grid; grid-template-columns: 32px 32px 1fr auto; gap: 16px;
+    padding: 16px 24px; border-bottom: 1px solid var(--line); align-items: center;
+  }
+  .checkpoint .num { font-family: var(--mono); font-size: 11px; color: var(--textFaint); letter-spacing: 0.1em; }
+  .checkpoint .ico {
+    width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
+  }
+  .checkpoint .ico.ok { background: rgba(61,217,120,0.15); color: var(--green); }
+  .checkpoint .ico.bad { background: rgba(229,72,77,0.15); color: var(--red); }
+  .checkpoint .ico svg { width: 14px; height: 14px; stroke-width: 2.5; }
+  .checkpoint .body .t { font-size: 13px; font-weight: 600; margin-bottom: 3px; letter-spacing: 0.04em; text-transform: uppercase; }
+  .checkpoint .body .s { font-family: var(--mono); font-size: 11px; color: var(--textDim); }
+
+  /* ===== MAP / TALHOES ===== */
+  .talhoes-map {
+    background: #06090C; border: 1px solid var(--line); position: relative;
+  }
+  .alert-card {
+    padding: 14px 16px; background: rgba(229,72,77,0.06); border: 1px solid rgba(229,72,77,0.3);
+    margin-bottom: 12px;
+  }
+  .alert-card .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .alert-card .title { font-size: 13px; font-weight: 600; color: var(--red); }
+  .alert-card .sub { font-family: var(--mono); font-size: 11px; color: var(--textDim); }
+
+  /* ===== PAGINATION ===== */
+  .pagination {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 16px; border-top: 1px solid var(--line); background: var(--panel);
+    font-family: var(--mono); font-size: 11px; color: var(--textDim);
+  }
+  .pagination .controls { display: flex; gap: 6px; }
+  .pagination button {
+    background: transparent; border: 1px solid var(--line); color: var(--text);
+    padding: 4px 12px; font-family: var(--mono); font-size: 11px; cursor: pointer;
+  }
+  .pagination button:hover:not(:disabled) { border-color: var(--cyan); color: var(--cyan); }
+  .pagination button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ===== FOOTER ===== */
+  .footer {
+    padding: 8px 16px; border-top: 1px solid var(--line); background: var(--panel);
+    font-family: var(--mono); font-size: 10px; color: var(--textFaint);
+    letter-spacing: 0.1em; text-transform: uppercase;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .footer .l { display: flex; gap: 12px; align-items: center; }
+  .footer .l span { color: var(--textDim); }
+
+  /* sub-tab content padding */
+  .pad { padding: 20px; }
+  .grid-2 { display: grid; grid-template-columns: 1.3fr 1fr; gap: 16px; }
+  .panel-card {
+    background: var(--panel); border: 1px solid var(--line); padding: 14px;
+  }
+  .panel-card h3 {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--textFaint); margin: 0 0 10px;
+  }
+
+  /* monitor mini-grid */
+  .monitor-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 16px; border-bottom: 1px solid var(--line); }
+  .crop-row {
+    display: flex; align-items: center; justify-content: space-between; padding: 10px 12px;
+    border: 1px solid var(--line); margin-bottom: 6px; font-family: var(--mono); font-size: 11px;
+  }
+  .crop-row .swatch { width: 10px; height: 10px; display: inline-block; margin-right: 8px; vertical-align: middle; }
+
+  .scrollable { overflow: auto; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-mark">S</div>
+      <div class="brand-name">SEKURA</div>
+      <div class="brand-ver">v3.2</div>
+    </div>
+    <div class="topnav" id="topnav">
+      <button data-mod="panel" class="active">Panel</button>
+      <button data-mod="scanner">Scanner</button>
+      <button data-mod="monitor">MonitoraToken</button>
+    </div>
+    <div class="right">
+      <span class="pulse"></span>
+      <span style="letter-spacing:0.1em;">STREAM_LIVE</span>
+      <span style="color:var(--textFaint);" id="clock">2026.05.04 · 14:23 BRT</span>
+      <div class="lang" id="lang">
+        <button data-l="pt">PT</button>
+        <button data-l="es" class="active">ES</button>
+        <button data-l="en">EN</button>
+      </div>
+      <span class="user-tag">JS@SEKURA</span>
+    </div>
+  </div>
+
+  <!-- BODY -->
+  <div class="body">
+    <!-- SIDEBAR -->
+    <div class="sidebar" id="sidebar">
+      <button class="side-btn active" data-mod="panel" title="Panel">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      </button>
+      <button class="side-btn" data-mod="scanner" title="Scanner">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      </button>
+      <button class="side-btn" data-mod="monitor" title="MonitoraToken">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
+      <div class="side-spacer"></div>
+      <div class="side-label">SEKURA · 2026</div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main" id="main"></div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="l">
+      <span>SEKURA</span>
+      <span>·</span>
+      <span>powered by sekura.io</span>
+      <span>·</span>
+      <span>© 2026</span>
+    </div>
+    <div>NODE 03 · SP-EAST · OPS_HEALTHY</div>
+  </div>
+</div>
+
+<script>
+// ===========================================================================
+// I18N
+// ===========================================================================
+const I18N = {
+  pt: {
+    welcome: 'Bem-vindo, analista.', tagline: 'Painel de controle — Monitoramento de garantias rurais',
+    newQuery: 'Nova consulta', filters: 'Filtros',
+    portfolio: 'Carteira total', cars: 'Total CARs', alerts: 'Alertas ativos',
+    exposure: 'Exposição', breach: 'Em descumprimento', risk: 'Risco médio',
+    geoTitle: 'Distribuição geográfica', detTitle: 'Detecções (12 sem.)',
+    region: 'Região', status: 'Situação',
+    car: 'CAR', owner: 'Proprietário', cpf: 'CPF', muni: 'Município', area: 'Área',
+    all: 'Todos', ok: 'Conforme', breach2: 'Não conforme', watch: 'Observação',
+    page: 'Pág.', of: 'de', records: 'registros', prev: 'Anterior', next: 'Próximo',
+    scanner: 'Scanner', scannerSub: 'Insira um CNPJ, CPF, Nota Fiscal ou código CAR para consultar o monitoramento',
+    consult: 'Consultar', searching: 'Buscando…', sample: 'Dados de teste',
+    cnpjPh: '00.000.000/0000-00', cpfPh: '000.000.000-00', carPh: 'UF-0000000-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+    drag: 'Arraste seus arquivos aqui ou clique para selecionar',
+    dragNF: 'Formatos suportados: PDF · ZIP · até 25MB',
+    dragArq: 'Formatos suportados: PDF · CSV · até 25MB',
+    monitorEmpty: 'Nenhum CAR consultado ainda.',
+    monitorEmpty2: 'Use o Painel de Controle ou o Scanner para selecionar um CAR.',
+    goPanel: 'Ir ao Painel', goScanner: 'Abrir Scanner',
+    laudo: 'Laudo técnico', moreOpts: 'Mais opções', viewSicar: 'Visualizar no SICAR',
+    audit: 'Auditoria regulatória', geoms: 'Geometrias', overlap: 'Sobreposição', monitoring: 'Monitoramento',
+    hectares: 'Hectares', agArea: 'Área agrícola', unprodArea: 'Área improdutiva',
+    muniUf: 'Município/UF', statusV: 'Status', tipo: 'Tipo', activo: 'Ativo', imovel: 'Imóvel rural',
+    confName: 'Conforme', notConf: 'Não conforme',
+    crumb: 'CARs',
+    cnpj: 'CNPJ', score: 'Score', linkedCars: 'CARs vinculados', totalArea: 'Área total',
+    properties: 'Imóveis rurais', connections: 'Conexões identificadas',
+    talhoes: 'Mapa dos talhões', soja: 'Soja', milho: 'Milho',
+    activeAlerts: 'Alertas ativos', vegCover: 'Cobertura vegetal',
+    criticalAlert: 'Alerta crítico', summary: 'Resumo', current: 'Atual', historic: 'Histórico',
+    detected: 'Detectado', confidence: 'Confiança', source: 'Fonte', severity: 'Severidade',
+    high: 'Alta', med: 'Média', low: 'Baixa',
+    deforestation: 'Desmatamento', fire: 'Foco de calor', embargo: 'Embargo IBAMA',
+    download: 'Baixar imagem de geometrias',
+    cropArea: 'Tipo de área', pct: '%',
+    consolidated: 'Área consolidada', unproductive: 'Área improdutiva', total: 'Total',
+  },
+  es: {
+    welcome: 'Bienvenido, analista.', tagline: 'Panel de control — Monitoreo de garantías rurales',
+    newQuery: 'Nueva consulta', filters: 'Filtros',
+    portfolio: 'Cartera total', cars: 'Total CARs', alerts: 'Alertas activas',
+    exposure: 'Exposición', breach: 'En incumplimiento', risk: 'Riesgo medio',
+    geoTitle: 'Distribución geográfica', detTitle: 'Detecciones (12 sem.)',
+    region: 'Región', status: 'Estado',
+    car: 'CAR', owner: 'Propietario', cpf: 'CPF', muni: 'Municipio', area: 'Área',
+    all: 'Todos', ok: 'Conforme', breach2: 'No conforme', watch: 'Observación',
+    page: 'Pág.', of: 'de', records: 'registros', prev: 'Anterior', next: 'Siguiente',
+    scanner: 'Scanner', scannerSub: 'Ingresa un CNPJ, CPF, Nota Fiscal o código CAR para consultar el monitoreo',
+    consult: 'Consultar', searching: 'Buscando…', sample: 'Datos de prueba',
+    cnpjPh: '00.000.000/0000-00', cpfPh: '000.000.000-00', carPh: 'UF-0000000-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+    drag: 'Arrastra tus archivos aquí o haz clic para seleccionar',
+    dragNF: 'Formatos: PDF · ZIP · hasta 25MB',
+    dragArq: 'Formatos: PDF · CSV · hasta 25MB',
+    monitorEmpty: 'Ningún CAR consultado todavía.',
+    monitorEmpty2: 'Usa el Panel de Control o el Scanner para seleccionar un CAR.',
+    goPanel: 'Ir al Panel', goScanner: 'Abrir Scanner',
+    laudo: 'Laudo técnico', moreOpts: 'Más opciones', viewSicar: 'Ver en SICAR',
+    audit: 'Auditoría regulatoria', geoms: 'Geometrías', overlap: 'Solapamiento', monitoring: 'Monitoreo',
+    hectares: 'Hectáreas', agArea: 'Área agrícola', unprodArea: 'Área improductiva',
+    muniUf: 'Municipio/UF', statusV: 'Estado', tipo: 'Tipo', activo: 'Activo', imovel: 'Inmueble rural',
+    confName: 'Conforme', notConf: 'No conforme',
+    crumb: 'CARs',
+    cnpj: 'CNPJ', score: 'Score', linkedCars: 'CARs vinculados', totalArea: 'Área total',
+    properties: 'Inmuebles rurales', connections: 'Conexiones identificadas',
+    talhoes: 'Mapa de parcelas', soja: 'Soja', milho: 'Maíz',
+    activeAlerts: 'Alertas activas', vegCover: 'Cobertura vegetal',
+    criticalAlert: 'Alerta crítica', summary: 'Resumen', current: 'Actual', historic: 'Histórico',
+    detected: 'Detectado', confidence: 'Confianza', source: 'Fuente', severity: 'Severidad',
+    high: 'Alta', med: 'Media', low: 'Baja',
+    deforestation: 'Deforestación', fire: 'Foco de calor', embargo: 'Embargo IBAMA',
+    download: 'Descargar imagen de geometrías',
+    cropArea: 'Tipo de área', pct: '%',
+    consolidated: 'Área consolidada', unproductive: 'Área improductiva', total: 'Total',
+  },
+  en: {
+    welcome: 'Welcome, analyst.', tagline: 'Control panel — Rural collateral monitoring',
+    newQuery: 'New query', filters: 'Filters',
+    portfolio: 'Total portfolio', cars: 'Total CARs', alerts: 'Active alerts',
+    exposure: 'Exposure', breach: 'In breach', risk: 'Avg. risk',
+    geoTitle: 'Geographic distribution', detTitle: 'Detections (12 wks.)',
+    region: 'Region', status: 'Status',
+    car: 'CAR', owner: 'Owner', cpf: 'CPF', muni: 'Municipality', area: 'Area',
+    all: 'All', ok: 'Compliant', breach2: 'Non-compliant', watch: 'Watch',
+    page: 'Page', of: 'of', records: 'records', prev: 'Previous', next: 'Next',
+    scanner: 'Scanner', scannerSub: 'Enter a CNPJ, CPF, Invoice or CAR code to query monitoring',
+    consult: 'Query', searching: 'Searching…', sample: 'Sample data',
+    cnpjPh: '00.000.000/0000-00', cpfPh: '000.000.000-00', carPh: 'UF-0000000-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+    drag: 'Drag files here or click to select',
+    dragNF: 'Formats: PDF · ZIP · up to 25MB',
+    dragArq: 'Formats: PDF · CSV · up to 25MB',
+    monitorEmpty: 'No CAR consulted yet.',
+    monitorEmpty2: 'Use the Panel or Scanner to select a CAR.',
+    goPanel: 'Go to Panel', goScanner: 'Open Scanner',
+    laudo: 'Technical report', moreOpts: 'More options', viewSicar: 'View on SICAR',
+    audit: 'Regulatory audit', geoms: 'Geometries', overlap: 'Overlap', monitoring: 'Monitoring',
+    hectares: 'Hectares', agArea: 'Agricultural area', unprodArea: 'Unproductive area',
+    muniUf: 'Municipality/UF', statusV: 'Status', tipo: 'Type', activo: 'Active', imovel: 'Rural property',
+    confName: 'Compliant', notConf: 'Non-compliant',
+    crumb: 'CARs',
+    cnpj: 'CNPJ', score: 'Score', linkedCars: 'Linked CARs', totalArea: 'Total area',
+    properties: 'Rural properties', connections: 'Identified connections',
+    talhoes: 'Field map', soja: 'Soy', milho: 'Corn',
+    activeAlerts: 'Active alerts', vegCover: 'Vegetation cover',
+    criticalAlert: 'Critical alert', summary: 'Summary', current: 'Current', historic: 'Historic',
+    detected: 'Detected', confidence: 'Confidence', source: 'Source', severity: 'Severity',
+    high: 'High', med: 'Medium', low: 'Low',
+    deforestation: 'Deforestation', fire: 'Heat anomaly', embargo: 'IBAMA embargo',
+    download: 'Download geometry image',
+    cropArea: 'Area type', pct: '%',
+    consolidated: 'Consolidated area', unproductive: 'Unproductive area', total: 'Total',
+  }
+};
+
+// ===========================================================================
+// DATA
+// ===========================================================================
+const REGIONS = [
+  { id: 'north', pt: 'Norte', es: 'Norte', en: 'North', cars: 263, pct: 13.8, color: '#3DD978' },
+  { id: 'northeast', pt: 'Nordeste', es: 'Nordeste', en: 'Northeast', cars: 566, pct: 29.8, color: '#E8A93C' },
+  { id: 'midwest', pt: 'Centro-Oeste', es: 'Centro-Oeste', en: 'Midwest', cars: 493, pct: 25.9, color: '#9B7EE8' },
+  { id: 'southeast', pt: 'Sudeste', es: 'Sudeste', en: 'Southeast', cars: 296, pct: 15.6, color: '#3DD9D6' },
+  { id: 'south', pt: 'Sul', es: 'Sur', en: 'South', cars: 282, pct: 14.8, color: '#7AB9F5' },
+];
+
+// 15 sample CARs for the table
+const PROPS = [
+  { car: 'AC-0000000-C3C244183A57D04B4F1C26E714C7794E', owner: 'PEDRO HENRIQUE R',  cpf: '738.975.279-96', muni: 'Lábrea',     uf: 'AC', region: 'north',     ha: 1470, status: 'breach' },
+  { car: 'AC-0000000-27170E3D8BD31D3DEF7A2AB32C2F18AC', owner: 'JOAO PEDRO LIMA',   cpf: '714.957.117-75', muni: 'Rio Branco', uf: 'AC', region: 'north',     ha: 1946, status: 'breach' },
+  { car: 'AC-0000000-9322EC28DE00B6B990DC2595FC79B9AF', owner: 'ATILIO ELIAS BONA', cpf: '441.168.319-96', muni: 'Cruzeiro',   uf: 'AC', region: 'north',     ha: 2019, status: 'breach' },
+  { car: 'AC-0000000-029D405340844D481A0CDA6241408ECC', owner: 'NERI JOSE CHIARE',  cpf: '983.262.916-68', muni: 'Tarauacá',   uf: 'AC', region: 'north',     ha: 1330, status: 'breach' },
+  { car: 'AC-0000000-AFF378EEF779668C1ADFDC3549AB9F8A', owner: 'CARLOS EDUARDO M',  cpf: '118.311.547-56', muni: 'Sena Mad.',  uf: 'AC', region: 'north',     ha: 540,  status: 'breach' },
+  { car: 'MT-5108402-B4F12C2614C7794E50A4B8D331EE7702', owner: 'JOÃO P. LIMA SOARES',cpf: '714.957.117-75', muni: 'Sorriso',    uf: 'MT', region: 'midwest',   ha: 1946, status: 'ok' },
+  { car: 'BA-2919959-3C44A058D331EE0177CFF1A0B71D33',   owner: 'ATILIO E. BONATTI', cpf: '441.168.319-96', muni: 'Luís Ed. M.',uf: 'BA', region: 'northeast', ha: 2019, status: 'watch' },
+  { car: 'PR-4104808-D8017E2A0B1CC72A55B6FA7440EE7702', owner: 'NERI J. CHIARELLI', cpf: '983.262.916-68', muni: 'Cascavel',   uf: 'PR', region: 'south',     ha: 1330, status: 'ok' },
+  { car: 'MG-3170107-EE1C2B9F0177CFF1ABCDEF1234567890', owner: 'CARLOS E. MENDONÇA',cpf: '118.311.547-56', muni: 'Uberaba',    uf: 'MG', region: 'southeast', ha: 540,  status: 'breach' },
+  { car: 'PE-2611606-FA98C201D8017E2A0B1CC72A55B6FA74', owner: 'MARINA S. VASC.',   cpf: '209.554.837-21', muni: 'Petrolina',  uf: 'PE', region: 'northeast', ha: 880,  status: 'ok' },
+  { car: 'GO-5218805-7B0911CD8017E2A0B1CC72A55B6FA740', owner: 'ROBERTO A. TANAKA', cpf: '654.221.908-43', muni: 'Rio Verde',  uf: 'GO', region: 'midwest',   ha: 3210, status: 'watch' },
+  { car: 'MT-5105309-021D5F8E10AB1C2D3E4F5A6B7C8D9E10', owner: 'HELENA M. COUTINHO',cpf: '871.063.554-09', muni: 'Lucas R.V.', uf: 'MT', region: 'midwest',   ha: 4180, status: 'ok' },
+  { car: 'PA-1504208-B6FA744011223344556677889900AABB', owner: 'SEBASTIÃO L. P.',   cpf: '335.408.711-62', muni: 'Marabá',     uf: 'PA', region: 'north',     ha: 2750, status: 'breach' },
+  { car: 'SP-3543402-7C3EDD1B22334455667788990011AACD', owner: 'ANA L. FIGUEIREDO', cpf: '487.225.310-04', muni: 'Rib. Preto', uf: 'SP', region: 'southeast', ha: 1180, status: 'ok' },
+  { car: 'MS-5006606-AB991231415161718192A2B2C2D2E2F', owner: 'OTÁVIO P. SANTOS',  cpf: '512.804.117-32', muni: 'Dourados',   uf: 'MS', region: 'midwest',   ha: 2080, status: 'watch' },
+];
+
+const SAMPLE_CNPJS = [
+  { cnpj: '12.345.678/0001-90', name: 'Fazenda São João Agropecuária Ltda', muni: 'Sorriso, MT' },
+  { cnpj: '23.456.789/0001-21', name: 'Agro Vale do Rio Verde S.A.',         muni: 'Rio Verde, GO' },
+  { cnpj: '34.567.890/0001-52', name: 'Plantio Cerrado Norte Ltda',          muni: 'Lucas do Rio Verde, MT' },
+];
+const SAMPLE_CPFS = [
+  { cpf: '714.957.117-75', name: 'João P. Lima Soares', muni: 'Sorriso, MT' },
+  { cpf: '441.168.319-96', name: 'Atilio E. Bonatti',   muni: 'Luís Eduardo M., BA' },
+  { cpf: '871.063.554-09', name: 'Helena M. Coutinho',  muni: 'Lucas do Rio Verde, MT' },
+];
+const SAMPLE_CARS = [
+  { car: 'MT-5108402-B4F12C2614C7794E50A4B8D331EE7702', muni: 'Sorriso, MT' },
+  { car: 'BA-2919959-3C44A058D331EE0177CFF1A0B71D33',   muni: 'Luís Eduardo M., BA' },
+  { car: 'GO-5218805-7B0911CD8017E2A0B1CC72A55B6FA740', muni: 'Rio Verde, GO' },
+];
+
+const ENTITY_DETAIL = {
+  '12.345.678/0001-90': {
+    name: 'Fazenda São João Agropecuária Ltda',
+    cnpj: '12.345.678/0001-90',
+    cars: 2, area: 1191, score: 91,
+    properties: [
+      { car: 'MT-5108402-B4F12C2614C7794E50A4B8D331EE7702', name: 'Fazenda São João I',  muni: 'Sorriso, MT', ha: 778.54, status: 'activo', score: 91 },
+      { car: 'MT-5105309-021D5F8E10AB1C2D3E4F5A6B7C8D9E10', name: 'Fazenda São João II', muni: 'Lucas do Rio Verde, MT', ha: 412.46, status: 'activo', score: 86 },
+    ],
+    connections: [
+      { type: 'Sócio', name: 'João P. Lima Soares', doc: '714.957.117-75', role: 'Administrador' },
+      { type: 'Sócio', name: 'Helena M. Coutinho',  doc: '871.063.554-09', role: 'Sócia 30%' },
+      { type: 'Sucursal', name: 'Agro Vale Norte Ltda', doc: '23.456.789/0001-21', role: 'Controlada' },
+    ]
+  }
+};
+
+const CAR_DETAIL = {
+  'MT-5108402-B4F12C2614C7794E50A4B8D331EE7702': {
+    car: 'MT-5108402-B4F12C2614C7794E50A4B8D331EE7702',
+    short: 'MT-5108402-B4F1...EE7702',
+    owner: 'Fazenda São João I',
+    muni: 'Sorriso', uf: 'MT',
+    ha: 778.54, agHa: 778.50, agPct: 100, unprodPct: 0,
+    status: 'activo', tipo: 'imovel',
+    audit: { cmn5193: 'ok', cmn5267: 'bad', cmn4902: 'ok' },
+    checkpoints: [
+      { num: '1', name: 'Situação registral',                ok: true,  mcr: 'MCR 2-1-1', desc: 'Registro vigente. Sem pendências cartoriais.' },
+      { num: '2', name: 'Impedimentos socioambientais',      ok: true,  mcr: 'MCR 2-1-3', desc: 'Sem trabalho análogo à escravidão. Sem áreas indígenas/quilombolas sobrepostas.' },
+      { num: '3', name: 'Embargos ambientais IBAMA',         ok: false, mcr: 'MCR 2-1-4', desc: 'Embargo ativo TAD-2024/4711. Sobrepõe 0,4 ha do polígono.' },
+      { num: '4', name: 'Desmatamento PRODES/MapBiomas',     ok: true,  mcr: 'MCR 2-1-5', desc: 'Sem detecções de corte raso desde 2008. NDVI estável.' },
+      { num: '5', name: 'Sensoriamento remoto Sentinel-2',   ok: true,  mcr: 'MCR 2-1-6', desc: 'Cobertura 100%. Última varredura 2026-05-02.' },
+      { num: '6', name: 'Requisitos PROAGRO',                ok: true,  mcr: 'MCR 16-9',  desc: 'Documentação seguro safra completa. CCIR válido.' },
+    ],
+    geometries: [
+      { tipo: 'Área consolidada', pct: 100,  ha: 778.50 },
+      { tipo: 'Área improdutiva', pct: 0,    ha: 0.04   },
+    ],
+    overlaps: [
+      { car: 'MT-5108402-AABBCCDD11223344556677889900EEFF', muni: 'Sorriso, MT', ha: 0.4, pct: 0.05, status: 'breach' },
+    ],
+    crops: [
+      { name: 'soja',  ha: 465.8, color: '#3DD978' },
+      { name: 'milho', ha: 312.7, color: '#E8A93C' },
+    ],
+    monitorAlerts: 3,
+    monitorVeg: 100,
+    alertList: [
+      { id: 'A-2281', kind: 'embargo', area: 0.4, conf: 100, sat: 'IBAMA',     date: '2026-04-28', sev: 'high' },
+      { id: 'A-2275', kind: 'fire',    area: 1.2, conf: 73,  sat: 'MODIS',     date: '2026-04-30', sev: 'medium' },
+      { id: 'A-2270', kind: 'overlap', area: 0.4, conf: 82,  sat: 'CAR-cross', date: '2026-04-29', sev: 'low' },
+    ]
+  },
+  'MT-5105309-021D5F8E10AB1C2D3E4F5A6B7C8D9E10': {
+    car: 'MT-5105309-021D5F8E10AB1C2D3E4F5A6B7C8D9E10',
+    short: 'MT-5105309-021D...9E10',
+    owner: 'Fazenda São João II',
+    muni: 'Lucas do Rio Verde', uf: 'MT',
+    ha: 412.46, agHa: 410.12, agPct: 99.4, unprodPct: 0.6,
+    status: 'activo', tipo: 'imovel',
+    audit: { cmn5193: 'ok', cmn5267: 'ok', cmn4902: 'ok' },
+    checkpoints: [
+      { num: '1', name: 'Situação registral', ok: true, mcr: 'MCR 2-1-1', desc: 'Registro vigente.' },
+      { num: '2', name: 'Impedimentos socioambientais', ok: true, mcr: 'MCR 2-1-3', desc: 'Sem ocorrências.' },
+      { num: '3', name: 'Embargos ambientais IBAMA', ok: true, mcr: 'MCR 2-1-4', desc: 'Sem embargos.' },
+      { num: '4', name: 'Desmatamento PRODES/MapBiomas', ok: true, mcr: 'MCR 2-1-5', desc: 'Sem detecções.' },
+      { num: '5', name: 'Sensoriamento remoto Sentinel-2', ok: true, mcr: 'MCR 2-1-6', desc: 'Cobertura 100%.' },
+      { num: '6', name: 'Requisitos PROAGRO', ok: true, mcr: 'MCR 16-9', desc: 'Documentação completa.' },
+    ],
+    geometries: [
+      { tipo: 'Área consolidada', pct: 99.4, ha: 410.12 },
+      { tipo: 'Área improdutiva', pct: 0.6,  ha: 2.34   },
+    ],
+    overlaps: [],
+    crops: [ { name: 'milho', ha: 410.12, color: '#E8A93C' } ],
+    monitorAlerts: 0,
+    monitorVeg: 100,
+    alertList: []
+  }
+};
+
+// ===========================================================================
+// STATE
+// ===========================================================================
+const state = {
+  module: 'panel',          // panel | scanner | monitor
+  lang: 'es',
+  filterRegion: 'all',
+  filterStatus: 'all',
+  page: 1, perPage: 15,
+  scannerTab: 'CAR',        // CAR | CNPJ | CPF | NF | ARQ
+  scannerInput: '',
+  scannerLoading: false,
+  scannerView: 'input',     // input | entity | car
+  scannerEntity: null,
+  scannerCar: null,
+  carSubtab: 'audit',
+  monitorTab: 'current',
+  lastConsultedCar: null,   // for MonitoraToken module
+};
+
+const $ = (sel, ctx = document) => ctx.querySelector(sel);
+const $$ = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
+const t = () => I18N[state.lang];
+
+// ===========================================================================
+// FORMATTERS
+// ===========================================================================
+const fmt = {
+  int: (n) => state.lang === 'en' ? n.toLocaleString('en-US') : n.toLocaleString('pt-BR'),
+  ha: (n) => fmt.int(n) + ' ha',
+  pct: (n) => (typeof n === 'number' ? n.toFixed(1) : n) + '%',
+};
+
+// ===========================================================================
+// RENDER ROUTER
+// ===========================================================================
+function render() {
+  // top nav active
+  $$('#topnav button').forEach(b => b.classList.toggle('active', b.dataset.mod === state.module));
+  $$('#sidebar .side-btn').forEach(b => b.classList.toggle('active', b.dataset.mod === state.module));
+  $$('#lang button').forEach(b => b.classList.toggle('active', b.dataset.l === state.lang));
+
+  const main = $('#main');
+  if (state.module === 'panel') main.innerHTML = renderPanel();
+  else if (state.module === 'scanner') main.innerHTML = renderScanner();
+  else if (state.module === 'monitor') main.innerHTML = renderMonitor();
+
+  attachHandlers();
+}
+
+// ===========================================================================
+// MODULE 1: PANEL
+// ===========================================================================
+function renderPanel() {
+  const T = t();
+  const filtered = PROPS.filter(p =>
+    (state.filterRegion === 'all' || p.region === state.filterRegion) &&
+    (state.filterStatus === 'all' || p.status === state.filterStatus)
+  );
+
+  const totalPages = 127; // sample real count, table rendering uses filtered
+  const visible = filtered.slice((state.page - 1) * state.perPage, state.page * state.perPage);
+
+  return `
+    <div class="panel-head">
+      <span class="tok">$</span> ${T.welcome.toUpperCase()}
+      <span class="right">${T.tagline}</span>
+    </div>
+
+    <div class="action-bar">
+      <button class="btn"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>${T.newQuery}</button>
+      <button class="btn ghost"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 6h18M6 12h12M10 18h4"/></svg>${T.filters}</button>
+    </div>
+
+    <!-- METRICS -->
+    <div class="metrics">
+      <div class="metric"><div class="lbl">${T.portfolio}</div><div class="val">${fmt.int(1974958)}</div><div class="sub">ha · +2.4% YoY</div></div>
+      <div class="metric"><div class="lbl">${T.cars}</div><div class="val">${fmt.int(1900)}</div><div class="sub">+18 / 7d</div></div>
+      <div class="metric"><div class="lbl">${T.alerts}</div><div class="val amber">${fmt.int(4280)}</div><div class="sub">+12 / 24h</div></div>
+      <div class="metric"><div class="lbl">${T.exposure}</div><div class="val">R$ 1.85B</div><div class="sub">BRL outstanding</div></div>
+      <div class="metric"><div class="lbl">${T.breach}</div><div class="val red">${fmt.int(287)}</div><div class="sub">15.1% portfolio</div></div>
+      <div class="metric"><div class="lbl">${T.risk}</div><div class="val cyan">34/100</div><div class="sub">σ 22</div></div>
+    </div>
+
+    <!-- GEO + DET -->
+    <div class="two-col">
+      <div>
+        <div class="panel-head"><span class="tok">$</span> ${T.geoTitle.toUpperCase()}</div>
+        <div class="hex-wrap">
+          ${renderHexMap()}
+          <div>
+            <div class="hex-list-h">REGIONS</div>
+            ${REGIONS.map(r => `
+              <div class="hex-row ${state.filterRegion === r.id ? 'active' : ''}" data-region="${r.id}">
+                <span>${r[state.lang]}</span>
+                <span class="dim">${fmt.pct(r.pct)}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="panel-head"><span class="tok">$</span> ${T.detTitle.toUpperCase()}</div>
+        <div class="det-wrap">
+          ${renderSparkBars()}
+          <div style="display:flex;justify-content:space-between;margin-top:6px;font-family:var(--mono);font-size:9px;color:var(--textFaint);"><span>W01</span><span>W06</span><span>W12</span></div>
+          <div style="margin-top:16px;display:grid;gap:8px;">
+            ${[
+              { k: T.deforestation, v: 358, c: 'var(--cyan)' },
+              { k: T.fire, v: 103, c: 'var(--amber)' },
+              { k: T.embargo, v: 9, c: 'var(--red)' },
+              { k: 'CAR overlap', v: 24, c: 'var(--violet)' },
+            ].map(row => `
+              <div class="det-row">
+                <span class="dim">${row.k}</span>
+                <span class="det-bar"><span style="width:${row.v / 358 * 100}%;background:${row.c}"></span></span>
+                <span class="right-align" style="color:${row.c}">${row.v}ha</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FILTERS -->
+    <div class="filter-bar">
+      <span class="lbl-mono">${T.status}:</span>
+      <button class="chip ${state.filterStatus === 'all' ? 'active' : ''}" data-status="all">${T.all}</button>
+      <button class="chip ${state.filterStatus === 'ok' ? 'active' : ''}" data-status="ok">${T.ok}</button>
+      <button class="chip ${state.filterStatus === 'breach' ? 'active' : ''}" data-status="breach">${T.breach2}</button>
+      <button class="chip ${state.filterStatus === 'watch' ? 'active' : ''}" data-status="watch">${T.watch}</button>
+      <span class="filter-sep"></span>
+      <span class="lbl-mono">${T.region}:</span>
+      <button class="chip ${state.filterRegion === 'all' ? 'active' : ''}" data-region-chip="all">${T.all}<span class="ct">1900</span></button>
+      ${REGIONS.map(r => `
+        <button class="chip ${state.filterRegion === r.id ? 'active' : ''}" data-region-chip="${r.id}">${r[state.lang]}<span class="ct">${r.cars}</span></button>
+      `).join('')}
+      <span style="margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--textDim);">${filtered.length} / 1900 rows</span>
+    </div>
+
+    <!-- TABLE -->
+    <div class="scrollable" style="flex:1;min-height:0;">
+      <table class="t">
+        <thead>
+          <tr>
+            <th>${T.car}</th>
+            <th>${T.owner}</th>
+            <th>${T.cpf}</th>
+            <th>${T.muni}</th>
+            <th class="right-align">${T.area}</th>
+            <th class="right-align">RISK</th>
+            <th>${T.status}</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${visible.map(p => {
+            const sc = p.status === 'ok' ? 'ok' : (p.status === 'watch' ? 'watch' : 'breach');
+            const lbl = p.status === 'ok' ? T.ok : (p.status === 'watch' ? T.watch : T.breach2);
+            const riskVal = p.status === 'breach' ? 70 + Math.floor(Math.random() * 25) : (p.status === 'watch' ? 35 + Math.floor(Math.random() * 20) : 8 + Math.floor(Math.random() * 15));
+            const rc = riskVal > 60 ? 'var(--red)' : (riskVal > 30 ? 'var(--amber)' : 'var(--green)');
+            return `
+              <tr class="click" data-car="${p.car}">
+                <td class="cyan" style="font-size:10px;">${p.car.slice(0, 32)}…</td>
+                <td>${p.owner}</td>
+                <td class="dim">${p.cpf}</td>
+                <td><span class="dim">${p.muni}</span> <span class="faint">${p.uf}</span></td>
+                <td class="right-align">${fmt.int(p.ha)}</td>
+                <td class="right-align"><span class="risk-bar"><span style="width:${riskVal}%;background:${rc}"></span></span>${riskVal}</td>
+                <td><span class="badge ${sc}">${lbl}</span></td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagination">
+      <span>${T.page} ${state.page} ${T.of} ${totalPages} — 1900 ${T.records}</span>
+      <div class="controls">
+        <button id="pg-prev" ${state.page <= 1 ? 'disabled' : ''}>← ${T.prev}</button>
+        <button id="pg-next">${T.next} →</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderHexMap() {
+  // simple hex grid representing Brazil regions
+  const hexes = [
+    { id: 'north', q: 0, r: 0 }, { id: 'north', q: 1, r: 0 }, { id: 'north', q: 2, r: 0 }, { id: 'north', q: 0, r: 1 }, { id: 'north', q: 1, r: 1 },
+    { id: 'northeast', q: 3, r: 0 }, { id: 'northeast', q: 4, r: 0 }, { id: 'northeast', q: 3, r: 1 }, { id: 'northeast', q: 4, r: 1 }, { id: 'northeast', q: 3, r: 2 },
+    { id: 'midwest', q: 1, r: 2 }, { id: 'midwest', q: 2, r: 2 }, { id: 'midwest', q: 1, r: 3 }, { id: 'midwest', q: 2, r: 3 },
+    { id: 'southeast', q: 3, r: 3 }, { id: 'southeast', q: 2, r: 4 }, { id: 'southeast', q: 3, r: 4 },
+    { id: 'south', q: 2, r: 5 }, { id: 'south', q: 1, r: 5 },
+  ];
+  const size = 26;
+  const w = Math.sqrt(3) * size;
+  const h2 = 2 * size * 0.75;
+  const colorFor = (id) => {
+    const r = REGIONS.find(x => x.id === id);
+    const intensity = r.pct / 30;
+    return state.filterRegion === id ? 'var(--cyan)' : `rgba(61,217,214,${0.1 + intensity * 0.6})`;
+  };
+  const polys = hexes.map((hex, i) => {
+    const cx = 30 + hex.q * w + (hex.r % 2) * (w / 2);
+    const cy = 30 + hex.r * h2;
+    const pts = [0,1,2,3,4,5].map(k => {
+      const a = (Math.PI/3)*k - Math.PI/2;
+      return `${cx + size*Math.cos(a)},${cy + size*Math.sin(a)}`;
+    }).join(' ');
+    return `<polygon points="${pts}" fill="${colorFor(hex.id)}" stroke="var(--lineHi)" stroke-width="1" data-hex="${hex.id}" style="cursor:pointer"/>`;
+  }).join('');
+  // labels per region cluster
+  const labels = REGIONS.map(r => {
+    const cluster = hexes.filter(h => h.id === r.id);
+    const avgQ = cluster.reduce((s, h) => s + h.q, 0) / cluster.length;
+    const avgR = cluster.reduce((s, h) => s + h.r, 0) / cluster.length;
+    const cx = 30 + avgQ * w + (Math.round(avgR) % 2) * (w / 2);
+    const cy = 30 + avgR * h2;
+    return `<g pointer-events="none">
+      <text x="${cx}" y="${cy - 1}" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="#0B0F14" font-weight="700" letter-spacing="0.08em">${r[state.lang].toUpperCase()}</text>
+      <text x="${cx}" y="${cy + 9}" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="#0B0F14" font-weight="700">${fmt.pct(r.pct)}</text>
+    </g>`;
+  }).join('');
+  return `<svg viewBox="0 0 320 280" style="width:100%;display:block;">${polys}${labels}</svg>`;
+}
+
+function renderSparkBars() {
+  const data = [12, 9, 22, 31, 18, 26, 41, 33, 28, 47, 39, 52];
+  const max = Math.max(...data);
+  const w = 320, h = 70;
+  const bw = w / data.length - 2;
+  const bars = data.map((v, i) =>
+    `<rect x="${i * (bw + 2)}" y="${h - (v/max) * h}" width="${bw}" height="${(v/max) * h}" fill="var(--cyan)" opacity="${0.3 + (v/max) * 0.7}"/>`
+  ).join('');
+  return `<svg width="100%" height="${h}" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">${bars}</svg>`;
+}
+
+// ===========================================================================
+// MODULE 2: SCANNER
+// ===========================================================================
+function renderScanner() {
+  const T = t();
+
+  if (state.scannerView === 'entity' && state.scannerEntity) return renderEntityView();
+  if (state.scannerView === 'car' && state.scannerCar) return renderCarDetail(state.scannerCar);
+
+  const tabs = [
+    { id: 'CAR', label: 'CAR' },
+    { id: 'CNPJ', label: 'CNPJ' },
+    { id: 'CPF', label: 'CPF' },
+    { id: 'NF', label: state.lang === 'en' ? 'Invoice' : 'Nota Fiscal' },
+    { id: 'ARQ', label: state.lang === 'en' ? 'Files' : 'Arquivos' },
+  ];
+
+  return `
+    <div class="panel-head">
+      <span class="tok">$</span> SCANNER
+      <span class="right">QUERY_ENGINE_V3 · Sentinel-2 · IBAMA · PRODES · MapBiomas</span>
+    </div>
+
+    <div class="scanner-hero">
+      <div class="scanner-ico">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      </div>
+      <div class="scanner-title">${T.scanner}</div>
+      <div class="scanner-sub">${T.scannerSub}</div>
+    </div>
+
+    <div class="scanner-tabs">
+      ${tabs.map(tab => `
+        <button data-tab="${tab.id}" class="${state.scannerTab === tab.id ? 'active' : ''}">${tab.label}</button>
+      `).join('')}
+    </div>
+
+    <div class="scanner-body">
+      ${renderScannerTabBody()}
+    </div>
+  `;
+}
+
+function renderScannerTabBody() {
+  const T = t();
+  const tab = state.scannerTab;
+
+  if (tab === 'CAR') {
+    return `
+      <div class="input-row">
+        <input class="input-mono" id="scan-input" placeholder="${T.carPh}" value="${state.scannerInput}" />
+        <button class="btn" id="scan-go">${state.scannerLoading ? T.searching : T.consult}</button>
+      </div>
+      <div class="sample-block">
+        <h4>${T.sample}</h4>
+        <div class="sample-list">
+          ${SAMPLE_CARS.map(s => `
+            <div class="sample-item" data-fill="${s.car}" data-go-car="${s.car}">
+              <span style="color:var(--cyan)">${s.car}</span>
+              <span class="dim">${s.muni}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+  if (tab === 'CNPJ') {
+    return `
+      <div class="input-row">
+        <input class="input-mono" id="scan-input" placeholder="${T.cnpjPh}" value="${state.scannerInput}" />
+        <button class="btn" id="scan-go">${state.scannerLoading ? T.searching : T.consult}</button>
+      </div>
+      <div class="sample-block">
+        <h4>${T.sample}</h4>
+        <div class="sample-list">
+          ${SAMPLE_CNPJS.map(s => `
+            <div class="sample-item" data-fill="${s.cnpj}" data-go-entity="${s.cnpj}">
+              <span style="color:var(--cyan)">${s.cnpj}</span>
+              <span class="dim">${s.name} · ${s.muni}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+  if (tab === 'CPF') {
+    return `
+      <div class="input-row">
+        <input class="input-mono" id="scan-input" placeholder="${T.cpfPh}" value="${state.scannerInput}" />
+        <button class="btn" id="scan-go">${state.scannerLoading ? T.searching : T.consult}</button>
+      </div>
+      <div class="sample-block">
+        <h4>${T.sample}</h4>
+        <div class="sample-list">
+          ${SAMPLE_CPFS.map(s => `
+            <div class="sample-item" data-fill="${s.cpf}" data-go-entity="12.345.678/0001-90">
+              <span style="color:var(--cyan)">${s.cpf}</span>
+              <span class="dim">${s.name} · ${s.muni}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+  if (tab === 'NF' || tab === 'ARQ') {
+    const sub = tab === 'NF' ? T.dragNF : T.dragArq;
+    return `
+      <div class="dropzone" id="dz">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <div class="t">${T.drag}</div>
+        <div class="s">${sub}</div>
+      </div>
+    `;
+  }
+}
+
+function renderEntityView() {
+  const T = t();
+  const e = state.scannerEntity;
+  return `
+    <div class="breadcrumb">
+      <a data-back-scanner>SCANNER</a>
+      <span class="sep">›</span>
+      <a data-back-scanner>CNPJ</a>
+      <span class="sep">›</span>
+      <span style="color:var(--text)">${e.cnpj}</span>
+    </div>
+    <div class="entity-head">
+      <h1>${e.name}</h1>
+      <div class="meta">${T.cnpj} ${e.cnpj} · ${e.cars} ${T.linkedCars} · ${fmt.ha(e.area)}</div>
+    </div>
+    <div class="entity-metrics">
+      <div class="metric"><div class="lbl">${T.linkedCars}</div><div class="val cyan">${e.cars}</div></div>
+      <div class="metric"><div class="lbl">${T.totalArea}</div><div class="val">${fmt.ha(e.area)}</div></div>
+      <div class="metric"><div class="lbl">${T.score}</div><div class="val green">${e.score}%</div></div>
+      <div class="metric"><div class="lbl">${T.statusV}</div><div class="val"><span class="badge ok">${T.activo.toUpperCase()}</span></div></div>
+    </div>
+
+    <div class="panel-head"><span class="tok">$</span> ${T.properties.toUpperCase()}</div>
+    <table class="t">
+      <thead>
+        <tr><th>${T.car}</th><th>${state.lang === 'en' ? 'Property' : 'Imóvel'}</th><th>${T.muni}</th><th class="right-align">${T.area}</th><th class="right-align">${T.score}</th><th>${T.statusV}</th></tr>
+      </thead>
+      <tbody>
+        ${e.properties.map(p => `
+          <tr class="click" data-go-car="${p.car}">
+            <td class="cyan" style="font-size:10px">${p.car.slice(0, 32)}…</td>
+            <td>${p.name}</td>
+            <td class="dim">${p.muni}</td>
+            <td class="right-align">${fmt.int(p.ha)} ha</td>
+            <td class="right-align" style="color:var(--green)">${p.score}%</td>
+            <td><span class="badge ok">${T.activo}</span></td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+
+    <div class="conn-card">
+      <h3>${T.connections}</h3>
+      <table class="t">
+        <thead><tr><th>${state.lang === 'en' ? 'Type' : 'Tipo'}</th><th>${state.lang === 'en' ? 'Name' : 'Nome'}</th><th>${state.lang === 'en' ? 'Document' : 'Documento'}</th><th>${state.lang === 'en' ? 'Role' : 'Papel'}</th></tr></thead>
+        <tbody>
+          ${e.connections.map(c => `
+            <tr><td class="dim">${c.type}</td><td>${c.name}</td><td class="dim">${c.doc}</td><td>${c.role}</td></tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+// ===========================================================================
+// CAR DETAIL
+// ===========================================================================
+function renderCarDetail(carId) {
+  const T = t();
+  const d = CAR_DETAIL[carId] || CAR_DETAIL['MT-5108402-B4F12C2614C7794E50A4B8D331EE7702'];
+
+  return `
+    <div class="breadcrumb">
+      <a data-back-scanner>SCANNER</a>
+      <span class="sep">›</span>
+      <a>${T.crumb.toUpperCase()}</a>
+      <span class="sep">›</span>
+      <span style="color:var(--text)">${d.short}</span>
+    </div>
+
+    <div class="car-head">
+      <div class="left">
+        <h1>${d.car}</h1>
+        <div class="sub">${d.owner} · ${d.muni}, ${d.uf}</div>
+        <a class="sicar">↗ ${T.viewSicar}</a>
+      </div>
+      <div class="actions">
+        <button class="btn blue">${T.laudo}</button>
+        <button class="btn ghost">⋯ ${T.moreOpts}</button>
+      </div>
+    </div>
+
+    <div class="car-metrics">
+      <div class="car-metric"><div class="lbl">${T.hectares}</div><div class="val">${fmt.int(d.ha)} ha</div></div>
+      <div class="car-metric"><div class="lbl">${T.agArea}</div><div class="val">${fmt.int(d.agHa)} ha</div><div class="sub">${fmt.pct(d.agPct)}</div></div>
+      <div class="car-metric"><div class="lbl">${T.unprodArea}</div><div class="val">${fmt.pct(d.unprodPct)}</div></div>
+      <div class="car-metric"><div class="lbl">${T.muniUf}</div><div class="val" style="font-size:13px">${d.muni}/${d.uf}</div></div>
+      <div class="car-metric"><div class="lbl">${T.statusV}</div><div class="val"><span class="badge ok">${T.activo.toUpperCase()}</span></div></div>
+      <div class="car-metric"><div class="lbl">${T.tipo}</div><div class="val" style="font-size:13px">${T.imovel}</div></div>
+    </div>
+
+    <div class="panel-head"><span class="tok">$</span> AUDITORIA REGULATÓRIA</div>
+    <div class="audit-strip">
+      ${[
+        { code: 'CMN 5.193', name: 'Risco socioambiental', desc: state.lang === 'en' ? 'Socio-environmental risk for rural credit operations.' : (state.lang === 'es' ? 'Riesgo socioambiental para operaciones de crédito rural.' : 'Risco socioambiental para operações de crédito rural.'), s: d.audit.cmn5193 },
+        { code: 'CMN 5.267', name: 'Restrições embargos', desc: state.lang === 'en' ? 'IBAMA embargo restrictions on rural collateral.' : (state.lang === 'es' ? 'Restricciones de embargos IBAMA sobre garantías.' : 'Restrições de embargos IBAMA sobre garantias rurais.'), s: d.audit.cmn5267 },
+        { code: 'CMN 4.902', name: 'Critérios PROAGRO', desc: state.lang === 'en' ? 'PROAGRO eligibility and seguro safra.' : (state.lang === 'es' ? 'Elegibilidad PROAGRO y seguro safra.' : 'Elegibilidade PROAGRO e seguro safra.'), s: d.audit.cmn4902 },
+      ].map(a => `
+        <div class="audit-card">
+          <div class="code">${a.code}</div>
+          <div class="name">${a.name}</div>
+          <div class="desc">${a.desc}</div>
+          <span class="badge ${a.s === 'ok' ? 'ok' : 'breach'}">${a.s === 'ok' ? T.confName : T.notConf}</span>
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="subtabs">
+      <button data-sub="audit" class="${state.carSubtab === 'audit' ? 'active' : ''}">${T.audit}</button>
+      <button data-sub="geoms" class="${state.carSubtab === 'geoms' ? 'active' : ''}">${T.geoms}</button>
+      <button data-sub="overlap" class="${state.carSubtab === 'overlap' ? 'active' : ''}">${T.overlap}</button>
+      <button data-sub="monitoring" class="${state.carSubtab === 'monitoring' ? 'active' : ''}">${T.monitoring}</button>
+    </div>
+
+    ${renderCarSubtab(d)}
+  `;
+}
+
+function renderCarSubtab(d) {
+  const T = t();
+  if (state.carSubtab === 'audit') {
+    return `<div class="checkpoint-list">
+      ${d.checkpoints.map(c => `
+        <div class="checkpoint">
+          <div class="num">${c.num.padStart(2, '0')}</div>
+          <div class="ico ${c.ok ? 'ok' : 'bad'}">
+            ${c.ok
+              ? '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>'
+              : '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'}
+          </div>
+          <div class="body">
+            <div class="t">${c.name}</div>
+            <div class="s">${c.desc}</div>
+          </div>
+          <span class="badge cyan">${c.mcr}</span>
+        </div>
+      `).join('')}
+    </div>`;
+  }
+  if (state.carSubtab === 'geoms') {
+    return `<div class="pad">
+      <div class="panel-card" style="margin-bottom:16px">
+        <h3>${T.cropArea}</h3>
+        <table class="t">
+          <thead><tr><th>${T.cropArea}</th><th class="right-align">${T.pct}</th><th class="right-align">${state.lang === 'en' ? 'Hectares' : 'Hectares'}</th></tr></thead>
+          <tbody>
+            ${d.geometries.map(g => `
+              <tr><td>${g.tipo}</td><td class="right-align">${fmt.pct(g.pct)}</td><td class="right-align">${g.ha.toFixed(2).replace('.', ',')} ha</td></tr>
+            `).join('')}
+            <tr><td><strong>${T.total}</strong></td><td class="right-align"><strong>100%</strong></td><td class="right-align"><strong>${fmt.int(d.ha)} ha</strong></td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:12px"><a style="color:var(--cyan);font-family:var(--mono);font-size:11px;cursor:pointer">↓ ${T.download}</a></div>
+      </div>
+      <div class="panel-card">
+        <h3>${T.geoms.toUpperCase()}</h3>
+        ${renderTalhoesMap(d)}
+      </div>
+    </div>`;
+  }
+  if (state.carSubtab === 'overlap') {
+    return `<div class="pad">
+      <div class="panel-card">
+        <h3>${T.overlap}</h3>
+        ${d.overlaps.length === 0
+          ? `<div style="font-family:var(--mono);font-size:11px;color:var(--textFaint);padding:20px 0;font-style:italic;">${state.lang === 'en' ? 'No overlaps detected.' : (state.lang === 'es' ? 'Sin solapamientos detectados.' : 'Sem sobreposições detectadas.')}</div>`
+          : `<table class="t">
+              <thead><tr><th>${T.car}</th><th>${T.muni}</th><th class="right-align">${T.area} (ha)</th><th class="right-align">${T.pct}</th><th>${T.statusV}</th></tr></thead>
+              <tbody>
+                ${d.overlaps.map(o => `
+                  <tr>
+                    <td class="cyan" style="font-size:10px">${o.car.slice(0, 32)}…</td>
+                    <td class="dim">${o.muni}</td>
+                    <td class="right-align">${o.ha} ha</td>
+                    <td class="right-align">${o.pct}%</td>
+                    <td><span class="badge ${o.status}">${o.status === 'breach' ? T.notConf : T.confName}</span></td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>`
+        }
+      </div>
+    </div>`;
+  }
+  if (state.carSubtab === 'monitoring') {
+    return `<div>
+      <div class="subtabs" style="border-top:0;padding:0 16px;">
+        <button data-monitor="current" class="${state.monitorTab === 'current' ? 'active' : ''}">${T.current}</button>
+        <button data-monitor="historic" class="${state.monitorTab === 'historic' ? 'active' : ''}">${T.historic}</button>
+      </div>
+      <div class="pad">
+        <div class="grid-2">
+          <div>
+            <div class="panel-card" style="margin-bottom:16px">
+              <h3>${T.summary}</h3>
+              ${d.crops.map(c => `
+                <div class="crop-row">
+                  <span><span class="swatch" style="background:${c.color}"></span>${c.name === 'soja' ? T.soja : T.milho}</span>
+                  <span>${c.ha.toFixed(1).replace('.', ',')} ha</span>
+                </div>
+              `).join('')}
+              <div style="margin-top:10px;display:flex;gap:8px;align-items:center;font-family:var(--mono);font-size:11px;">
+                <span style="color:var(--textDim)">STATE:</span>
+                <span class="badge ${d.monitorAlerts > 0 ? 'breach' : 'ok'}">${d.monitorAlerts > 0 ? T.criticalAlert : T.confName}</span>
+              </div>
+            </div>
+            ${d.alertList.length > 0 ? `
+              <div class="panel-card">
+                <h3>${T.activeAlerts}</h3>
+                ${d.alertList.map(a => `
+                  <div class="alert-card">
+                    <div class="head">
+                      <span class="title">${a.kind === 'embargo' ? T.embargo : (a.kind === 'fire' ? T.fire : (a.kind === 'overlap' ? 'CAR overlap' : T.deforestation))}</span>
+                      <span class="badge ${a.sev === 'high' ? 'breach' : (a.sev === 'medium' ? 'watch' : 'violet')}">${a.sev === 'high' ? T.high : (a.sev === 'medium' ? T.med : T.low)}</span>
+                    </div>
+                    <div class="sub">${a.id} · ${a.date} · ${a.area} ha · ${a.conf}% ${T.confidence} · ${a.sat}</div>
+                  </div>
+                `).join('')}
+              </div>
+            ` : ''}
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;">
+              <div class="panel-card" style="text-align:center;padding:18px;">
+                <div class="lbl" style="font-family:var(--mono);font-size:9px;color:var(--textFaint);letter-spacing:0.14em;text-transform:uppercase;margin-bottom:8px;">${T.activeAlerts}</div>
+                <div style="font-family:var(--mono);font-size:32px;font-weight:600;color:${d.monitorAlerts > 0 ? 'var(--red)' : 'var(--green)'};">${d.monitorAlerts}</div>
+              </div>
+              <div class="panel-card" style="text-align:center;padding:18px;">
+                <div class="lbl" style="font-family:var(--mono);font-size:9px;color:var(--textFaint);letter-spacing:0.14em;text-transform:uppercase;margin-bottom:8px;">${T.vegCover}</div>
+                <div style="font-family:var(--mono);font-size:32px;font-weight:600;color:var(--green);">${d.monitorVeg}%</div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="panel-card">
+              <h3>${T.talhoes}</h3>
+              ${renderTalhoesMap(d)}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }
+}
+
+function renderTalhoesMap(d) {
+  // Two parcels colored by crop
+  const parcels = [
+    { d: 'M 60 50 Q 120 40 180 60 L 220 90 L 200 160 Q 140 170 80 150 Z', c: d.crops[0]?.color || '#3DD978', label: d.crops[0]?.name === 'soja' ? t().soja : t().milho, ha: d.crops[0]?.ha },
+    { d: 'M 220 90 L 320 100 L 340 200 L 240 220 L 200 160 Z', c: d.crops[1]?.color || '#E8A93C', label: d.crops[1] ? (d.crops[1].name === 'soja' ? t().soja : t().milho) : '', ha: d.crops[1]?.ha },
+  ];
+  return `<div class="talhoes-map">
+    <svg viewBox="0 0 400 280" style="width:100%;display:block;">
+      <defs>
+        <pattern id="tg" width="20" height="20" patternUnits="userSpaceOnUse">
+          <path d="M 20 0 L 0 0 0 20" fill="none" stroke="var(--line)" stroke-width="0.5"/>
+        </pattern>
+      </defs>
+      <rect width="400" height="280" fill="url(#tg)"/>
+      ${parcels.filter(p => p.ha).map(p => `
+        <path d="${p.d}" fill="${p.c}" fill-opacity="0.35" stroke="${p.c}" stroke-width="1.5"/>
+      `).join('')}
+      ${d.alertList.filter(a => a.sev === 'high').map((_, i) => `
+        <circle cx="${180 + i*30}" cy="${110 + i*20}" r="4" fill="var(--red)">
+          <animate attributeName="r" values="4;9;4" dur="2s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/>
+        </circle>
+      `).join('')}
+      <text x="100" y="100" font-family="var(--mono)" font-size="10" fill="#0B0F14" font-weight="600">${parcels[0].label} · ${parcels[0].ha?.toFixed(1)}ha</text>
+      ${parcels[1].ha ? `<text x="240" y="160" font-family="var(--mono)" font-size="10" fill="#0B0F14" font-weight="600">${parcels[1].label} · ${parcels[1].ha?.toFixed(1)}ha</text>` : ''}
+      <text x="20" y="265" font-family="var(--mono)" font-size="9" fill="var(--textDim)">SENTINEL-2 · 10m · 2026-05-02</text>
+      <g transform="translate(370, 30)">
+        <circle r="14" fill="var(--panel)" stroke="var(--text)" stroke-width="0.8"/>
+        <path d="M 0 -10 L 3 0 L 0 10 L -3 0 Z" fill="var(--text)"/>
+        <text y="-16" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--text)">N</text>
+      </g>
+    </svg>
+  </div>`;
+}
+
+// ===========================================================================
+// MODULE 3: MONITORATOKEN
+// ===========================================================================
+function renderMonitor() {
+  const T = t();
+  if (state.lastConsultedCar) {
+    // If a CAR was consulted recently, show its detail
+    return `
+      <div class="panel-head"><span class="tok">$</span> MONITORATOKEN · ${state.lastConsultedCar.slice(0, 32)}…</div>
+      ${renderCarDetail(state.lastConsultedCar)}
+    `;
+  }
+  return `
+    <div class="panel-head"><span class="tok">$</span> MONITORATOKEN</div>
+    <div class="empty">
+      <div class="ico">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+      </div>
+      <h2>${T.monitorEmpty}</h2>
+      <p>${T.monitorEmpty2}</p>
+      <div class="empty-links">
+        <button class="btn ghost" data-mod-go="panel">${T.goPanel}</button>
+        <button class="btn" data-mod-go="scanner">${T.goScanner}</button>
+      </div>
+    </div>
+  `;
+}
+
+// ===========================================================================
+// HANDLERS
+// ===========================================================================
+function attachHandlers() {
+  // module nav
+  $$('[data-mod]').forEach(b => b.addEventListener('click', () => {
+    state.module = b.dataset.mod;
+    state.scannerView = 'input';
+    render();
+  }));
+  $$('[data-mod-go]').forEach(b => b.addEventListener('click', () => {
+    state.module = b.dataset.modGo;
+    render();
+  }));
+
+  // hex / region filters
+  $$('[data-hex]').forEach(el => el.addEventListener('click', () => {
+    const id = el.dataset.hex;
+    state.filterRegion = state.filterRegion === id ? 'all' : id;
+    state.page = 1;
+    render();
+  }));
+  $$('[data-region]').forEach(el => el.addEventListener('click', () => {
+    const id = el.dataset.region;
+    state.filterRegion = state.filterRegion === id ? 'all' : id;
+    state.page = 1;
+    render();
+  }));
+  $$('[data-region-chip]').forEach(el => el.addEventListener('click', () => {
+    state.filterRegion = el.dataset.regionChip;
+    state.page = 1;
+    render();
+  }));
+  $$('[data-status]').forEach(el => el.addEventListener('click', () => {
+    state.filterStatus = el.dataset.status;
+    state.page = 1;
+    render();
+  }));
+
+  // pagination
+  const pgPrev = $('#pg-prev'); if (pgPrev) pgPrev.addEventListener('click', () => { if (state.page > 1) { state.page--; render(); } });
+  const pgNext = $('#pg-next'); if (pgNext) pgNext.addEventListener('click', () => { state.page++; render(); });
+
+  // table → CAR detail
+  $$('tr[data-car]').forEach(tr => tr.addEventListener('click', () => {
+    state.scannerCar = tr.dataset.car;
+    state.lastConsultedCar = tr.dataset.car;
+    state.scannerView = 'car';
+    state.module = 'scanner';
+    state.carSubtab = 'audit';
+    render();
+  }));
+
+  // scanner tabs
+  $$('[data-tab]').forEach(b => b.addEventListener('click', () => {
+    state.scannerTab = b.dataset.tab;
+    state.scannerInput = '';
+    render();
+  }));
+
+  // sample fill
+  $$('[data-fill]').forEach(el => el.addEventListener('click', () => {
+    state.scannerInput = el.dataset.fill;
+    const inp = $('#scan-input');
+    if (inp) inp.value = el.dataset.fill;
+  }));
+
+  // sample → entity / car
+  $$('[data-go-entity]').forEach(el => el.addEventListener('click', () => {
+    const cnpj = el.dataset.goEntity;
+    state.scannerLoading = true;
+    render();
+    setTimeout(() => {
+      state.scannerEntity = ENTITY_DETAIL[cnpj];
+      state.scannerView = 'entity';
+      state.scannerLoading = false;
+      render();
+    }, 600);
+  }));
+  $$('[data-go-car]').forEach(el => el.addEventListener('click', () => {
+    const car = el.dataset.goCar;
+    state.scannerLoading = true;
+    render();
+    setTimeout(() => {
+      state.scannerCar = car;
+      state.lastConsultedCar = car;
+      state.scannerView = 'car';
+      state.carSubtab = 'audit';
+      state.scannerLoading = false;
+      render();
+    }, 500);
+  }));
+
+  // input
+  const inp = $('#scan-input');
+  if (inp) inp.addEventListener('input', e => state.scannerInput = e.target.value);
+  const goBtn = $('#scan-go');
+  if (goBtn) goBtn.addEventListener('click', () => {
+    state.scannerLoading = true;
+    render();
+    setTimeout(() => {
+      state.scannerLoading = false;
+      // best-effort routing based on tab
+      if (state.scannerTab === 'CAR') {
+        const c = state.scannerInput.trim();
+        state.scannerCar = CAR_DETAIL[c] ? c : 'MT-5108402-B4F12C2614C7794E50A4B8D331EE7702';
+        state.lastConsultedCar = state.scannerCar;
+        state.scannerView = 'car';
+        state.carSubtab = 'audit';
+      } else if (state.scannerTab === 'CNPJ' || state.scannerTab === 'CPF') {
+        state.scannerEntity = ENTITY_DETAIL['12.345.678/0001-90'];
+        state.scannerView = 'entity';
+      }
+      render();
+    }, 700);
+  });
+
+  // dropzone
+  const dz = $('#dz');
+  if (dz) {
+    dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('over'); });
+    dz.addEventListener('dragleave', () => dz.classList.remove('over'));
+    dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('over'); });
+    dz.addEventListener('click', () => alert(t().drag));
+  }
+
+  // back from entity / car
+  $$('[data-back-scanner]').forEach(a => a.addEventListener('click', () => {
+    state.scannerView = 'input';
+    state.scannerEntity = null;
+    state.scannerCar = null;
+    render();
+  }));
+
+  // CAR sub-tabs
+  $$('[data-sub]').forEach(b => b.addEventListener('click', () => {
+    state.carSubtab = b.dataset.sub;
+    render();
+  }));
+  $$('[data-monitor]').forEach(b => b.addEventListener('click', () => {
+    state.monitorTab = b.dataset.monitor;
+    render();
+  }));
+
+  // language
+  $$('#lang button').forEach(b => b.addEventListener('click', () => {
+    state.lang = b.dataset.l;
+    render();
+  }));
+}
+
+// ===========================================================================
+// CLOCK
+// ===========================================================================
+function tickClock() {
+  const d = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  const s = `${d.getFullYear()}.${pad(d.getMonth() + 1)}.${pad(d.getDate())} · ${pad(d.getHours())}:${pad(d.getMinutes())} BRT`;
+  const el = $('#clock');
+  if (el) el.textContent = s;
+}
+setInterval(tickClock, 30000);
+tickClock();
+
+// ===========================================================================
+// BOOT
+// ===========================================================================
+render();
+
+// initial topbar handlers
+$$('#topnav button').forEach(b => b.addEventListener('click', () => {
+  state.module = b.dataset.mod;
+  state.scannerView = 'input';
+  render();
+}));
+$$('#sidebar .side-btn').forEach(b => b.addEventListener('click', () => {
+  state.module = b.dataset.mod;
+  state.scannerView = 'input';
+  render();
+}));
+$$('#lang button').forEach(b => b.addEventListener('click', () => {
+  state.lang = b.dataset.l;
+  render();
+}));
+</script>
+</body>
+</html>
