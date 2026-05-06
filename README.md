@@ -23,3 +23,5 @@ The design medium is **HTML/CSS/JS** — these are prototypes, not production co
 - `sekura/README.md` — this file
 - `sekura/chats/` — conversation transcripts (read these!)
 - `sekura/project/` — the `Sekura` project files (HTML prototypes, assets, components)
+
+<!-- 2026-05-06: deploy preview pipeline verified — safe to remove -->
