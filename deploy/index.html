@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Sekura — Monitoreo de garantías rurales</title>
+<title>Sekura Monitoreo — garantías rurales</title>
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="apple-touch-icon" href="logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -96,16 +98,15 @@
     display: flex; align-items: center; padding: 0 24px; gap: 24px;
     flex-shrink: 0;
   }
-  .brand { display: flex; align-items: center; gap: 10px; }
-  .brand-mark {
-    width: 30px; height: 30px;
-    background: linear-gradient(135deg, #0F1A2E 0%, #2E4275 100%);
-    border-radius: 8px;
-    display: grid; place-items: center;
-    color: white; font-weight: 700; font-size: 14px;
-    letter-spacing: -0.02em;
+  .brand { display: flex; align-items: center; text-decoration: none; }
+  .brand-logo {
+    height: 44px; width: auto; display: block;
+    /* The logo PNG is square 500×500 with shield + "SEKURA MONITOREO" stacked.
+       At 44px height, width auto-renders ~44px (square). The "MONITOREO"
+       subtitle is small but readable on retina displays. */
   }
-  .brand-name { font-size: 16px; font-weight: 600; letter-spacing: -0.02em; }
+  /* Legacy classes kept defined to avoid breaking anything that may still reference them. */
+  .brand-mark, .brand-name { display: none; }
   .topbar .right { margin-left: auto; display: flex; align-items: center; gap: 14px; }
 
   .lang {
@@ -1183,10 +1184,9 @@
     <button class="hamburger" id="hamburger" aria-label="Open menu" aria-controls="sidebar" aria-expanded="false">
       <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
     </button>
-    <div class="brand">
-      <div class="brand-mark">S</div>
-      <div class="brand-name">Sekura</div>
-    </div>
+    <a class="brand" href="#" aria-label="Sekura Monitoreo">
+      <img src="logo.png" class="brand-logo" alt="Sekura Monitoreo">
+    </a>
     <div class="right">
       <div class="lang" id="lang">
         <button data-l="pt">PT</button>
@@ -2865,11 +2865,18 @@ function buildLaudoHTML(carId, lang, country) {
   // Critical lote = the one with worst |deviation|.
   const criticalLote = d.lotes.slice().sort((a, b) => Math.abs(b.deviation) - Math.abs(a.deviation))[0];
 
+  // The laudo opens in a new window via window.open(''), which lands on
+  // about:blank. Without a <base href>, relative URLs like "logo.png" cannot
+  // resolve. We capture the parent's origin and inject it as <base href>.
+  const ORIGIN = (typeof window !== 'undefined' && window.location && window.location.origin) ? window.location.origin : '';
+
   return `<!DOCTYPE html>
 <html lang="${lang}">
 <head>
 <meta charset="UTF-8">
+<base href="${ORIGIN}/">
 <title>${T('Informe Técnico','Informe Técnico','Technical Report')} — ${d.car}</title>
+<link rel="icon" type="image/png" href="logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -2922,10 +2929,11 @@ function buildLaudoHTML(carId, lang, country) {
     display: flex; align-items: center; gap: 14px;
   }
   .laudo-logo {
-    width: 40px; height: 40px; border-radius: 8px;
-    background: linear-gradient(135deg, var(--brand) 0%, #2E4275 100%);
-    color: white; display: grid; place-items: center;
-    font-weight: 700; font-size: 13px; letter-spacing: -0.02em;
+    /* New: real Sekura Monitoreo logo image (was a gradient box with "SK" text). */
+    width: 56px; height: 56px;
+    object-fit: contain;
+    display: block;
+    flex-shrink: 0;
   }
   .laudo-header h1 {
     margin: 0; font-size: 15px; font-weight: 700;
@@ -3103,7 +3111,7 @@ function buildLaudoHTML(carId, lang, country) {
 <!-- ============================ PAGE 1 ============================ -->
 <div class="page">
   <div class="laudo-header">
-    <div class="laudo-logo">SK</div>
+    <img class="laudo-logo" src="logo.png" alt="Sekura Monitoreo">
     <div>
       <h1>${T('INFORME TÉCNICO — MONITORAMENTO GEOESPACIAL','INFORME TÉCNICO — MONITOREO GEOESPACIAL','TECHNICAL REPORT — GEOSPATIAL MONITORING')}</h1>
       <div class="sub">Sekura — ${T('Plataforma de Compliance Ambiental Rural','Plataforma de Cumplimiento Ambiental Rural','Rural Environmental Compliance Platform')}</div>
@@ -3230,7 +3238,7 @@ function buildLaudoHTML(carId, lang, country) {
 <!-- ============================ PAGE 2 ============================ -->
 <div class="page">
   <div class="laudo-header">
-    <div class="laudo-logo">SK</div>
+    <img class="laudo-logo" src="logo.png" alt="Sekura Monitoreo">
     <div>
       <h1>${T('INFORME TÉCNICO — MONITORAMENTO GEOESPACIAL','INFORME TÉCNICO — MONITOREO GEOESPACIAL','TECHNICAL REPORT — GEOSPATIAL MONITORING')}</h1>
       <div class="sub">Sekura — ${T('Plataforma de Compliance Ambiental Rural','Plataforma de Cumplimiento Ambiental Rural','Rural Environmental Compliance Platform')}</div>
@@ -3306,7 +3314,7 @@ function buildLaudoHTML(carId, lang, country) {
 <!-- ============================ PAGE 3 ============================ -->
 <div class="page">
   <div class="laudo-header">
-    <div class="laudo-logo">SK</div>
+    <img class="laudo-logo" src="logo.png" alt="Sekura Monitoreo">
     <div>
       <h1>${T('INFORME TÉCNICO — MONITORAMENTO GEOESPACIAL','INFORME TÉCNICO — MONITOREO GEOESPACIAL','TECHNICAL REPORT — GEOSPATIAL MONITORING')}</h1>
       <div class="sub">Sekura — ${T('Plataforma de Compliance Ambiental Rural','Plataforma de Cumplimiento Ambiental Rural','Rural Environmental Compliance Platform')}</div>
