@@ -978,7 +978,196 @@
   .mb-16 { margin-bottom: 16px; }
   .mb-22 { margin-bottom: 22px; }
 
-  @media (max-width: 1100px) {
+  /* ==========================================================================
+     RESPONSIVE
+     - ≥1024px (desktop): no visual changes vs current production.
+     - 768–1023px (tablet): some 2-column collapses + sidebar becomes overlay.
+     - <768px  (phone):    1-col KPIs, compact topbar, scroll country tabs.
+     - <430px  (small):    extra trims (reserved for future).
+     ========================================================================== */
+
+  /* Hamburger + sidebar-close + scrim + mobile lang select are HIDDEN by default.
+     We only show them when the responsive media query kicks in. */
+  .hamburger {
+    display: none;
+    width: 36px; height: 36px;
+    background: var(--surface2);
+    border: 1px solid var(--border); border-radius: 8px;
+    place-items: center; cursor: pointer; color: var(--ink2);
+    flex-shrink: 0;
+  }
+  .hamburger:hover { color: var(--ink); border-color: var(--borderHi); }
+  .hamburger svg { width: 18px; height: 18px; }
+
+  .sidebar-close {
+    display: none;
+    position: absolute; top: 10px; right: 10px;
+    width: 32px; height: 32px;
+    background: transparent; border: none; cursor: pointer;
+    color: var(--muted); border-radius: 6px;
+    place-items: center;
+  }
+  .sidebar-close:hover { background: var(--surface2); color: var(--ink); }
+  .sidebar-close svg { width: 18px; height: 18px; }
+
+  .scrim { display: none; }
+  .lang-mobile { display: none; }
+
+  /* Tablet & phone: turn sidebar into a slide-in overlay. */
+  @media (max-width: 1023px) {
+    /* Show mobile-only controls */
+    .hamburger { display: grid; }
+    .sidebar-close { display: grid; }
+
+    /* Hide desktop language buttons; show native select picker on touch devices */
+    .lang { display: none; }
+    .lang-mobile {
+      display: block;
+      background: var(--surface2);
+      border: 1px solid var(--border); border-radius: 8px;
+      padding: 6px 10px; font-size: 12px; font-weight: 500;
+      color: var(--ink2); cursor: pointer;
+      font-family: var(--sans);
+      -webkit-appearance: none; -moz-appearance: none; appearance: none;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%235A6270' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      padding-right: 26px;
+    }
+
+    /* Hide user name on mobile, keep avatar-only */
+    .user-chip {
+      padding: 4px;
+      background: transparent; border: none;
+    }
+    .user-chip:hover { border: none; }
+    .user-chip .nm { display: none; }
+
+    /* Topbar tightening */
+    .topbar { padding: 0 12px; gap: 10px; }
+    .topbar .right { gap: 8px; }
+    .brand-name { font-size: 15px; }
+
+    /* SIDEBAR: turn into overlay panel */
+    .sidebar {
+      position: fixed;
+      top: 60px;            /* sits below the topbar */
+      left: 0; bottom: 0;
+      width: 280px; max-width: 82vw;
+      transform: translateX(-100%);
+      transition: transform 240ms cubic-bezier(0.32, 0.72, 0, 1);
+      z-index: 100;
+      box-shadow: 8px 0 32px rgba(15, 26, 46, 0.14);
+      padding-top: 48px;   /* leave room for the close X button */
+    }
+    .sidebar.is-open { transform: translateX(0); }
+
+    /* Scrim: dark overlay between main content and sidebar */
+    .scrim {
+      display: block;
+      position: fixed;
+      top: 60px;            /* match topbar height */
+      left: 0; right: 0; bottom: 0;
+      background: rgba(15, 26, 46, 0.45);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 240ms ease;
+      z-index: 99;
+    }
+    .scrim.is-active { opacity: 1; pointer-events: auto; }
+
+    /* When sidebar open, prevent body scroll behind it */
+    body.is-locked { overflow: hidden; }
+
+    /* COUNTRY TABS: horizontal scroll with right-edge fade */
+    .country-tabs-wrap {
+      position: relative;
+      overflow: hidden;
+    }
+    .country-tabs {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      flex-wrap: nowrap;
+      padding-right: 24px;  /* space for the fade gradient */
+    }
+    .country-tabs::-webkit-scrollbar { display: none; }
+    .country-tab { flex-shrink: 0; }
+    .country-tabs-wrap::after {
+      content: '';
+      position: absolute;
+      top: 0; right: 0; bottom: 0;
+      width: 32px;
+      background: linear-gradient(to left, var(--surface), rgba(255, 255, 255, 0));
+      pointer-events: none;
+    }
+
+    /* MAIN CONTENT: edge padding tighter on mobile */
+    .container { padding: 16px 14px; max-width: 100%; }
+    .page-head { gap: 10px; margin-bottom: 16px; }
+    .page-head h1 { font-size: 20px; }
+
+    /* GRIDS: 2col layouts collapse to 1col earlier */
+    .grid-2 { grid-template-columns: 1fr; gap: 12px; }
+    .car-grid { grid-template-columns: repeat(2, 1fr); }
+    .audit-grid { grid-template-columns: 1fr; }
+
+    /* KPIs: 2 columns on tablet, will collapse to 1 below */
+    .kpis { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .kpi { padding: 14px 16px; min-height: 0; }
+    .kpi .val { font-size: 24px; }
+
+    /* Cards: keep edge padding sensible */
+    .card-head { padding: 14px 16px; }
+    .card-body { padding: 16px; }
+
+    /* TABLES: horizontal scroll inside the card, body never scrolls horizontally */
+    .card .scroll-x,
+    table.t {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    table.t { min-width: 560px; }  /* let table breathe horizontally */
+    .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+    /* Map + legend: stack legend below on tablet */
+    .map-wrap { grid-template-columns: 1fr; min-height: 0; }
+    .map-stage { min-height: 360px; }
+    .legend { align-self: stretch; }
+
+    /* Critical callout: less padding */
+    .critical-callout { padding: 14px 16px; gap: 12px; }
+
+    /* CAR detail head: stack actions below */
+    .car-head-top { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .car-head-top .actions { width: 100%; flex-wrap: wrap; }
+    .car-head-top .actions .btn { flex: 1; justify-content: center; }
+    .car-grid { gap: 8px; }
+
+    /* Notification dropdown: not wider than viewport */
+    .notif-dropdown {
+      width: calc(100vw - 24px);
+      max-width: 380px;
+      right: -8px;
+    }
+  }
+
+  /* Phone-specific: 1-column KPIs, smaller paddings, full-width number cards */
+  @media (max-width: 767px) {
+    .kpis { grid-template-columns: 1fr; }
+    .car-grid { grid-template-columns: 1fr 1fr; }
+    .kpi .val { font-size: 26px; }  /* a touch larger now that they have space */
+    .country-tab { padding: 8px 12px; font-size: 12px; }
+    .country-tab .nm { font-size: 13px; }
+  }
+
+  /* Print laudo (separate window): unchanged */
+  @media print {
+    .hamburger, .sidebar-close, .scrim { display: none !important; }
+  }
+
+  /* Legacy desktop breakpoint kept untouched */
+  @media (max-width: 1100px) and (min-width: 1024px) {
     .kpis { grid-template-columns: repeat(2, 1fr); }
     .grid-2 { grid-template-columns: 1fr; }
     .car-grid { grid-template-columns: repeat(3, 1fr); }
@@ -991,6 +1180,9 @@
 <div class="app">
   <!-- TOPBAR -->
   <div class="topbar">
+    <button class="hamburger" id="hamburger" aria-label="Open menu" aria-controls="sidebar" aria-expanded="false">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
     <div class="brand">
       <div class="brand-mark">S</div>
       <div class="brand-name">Sekura</div>
@@ -1001,6 +1193,11 @@
         <button data-l="es" class="active">ES</button>
         <button data-l="en">EN</button>
       </div>
+      <select class="lang-mobile" id="lang-mobile" aria-label="Idioma">
+        <option value="pt">PT</option>
+        <option value="es" selected>ES</option>
+        <option value="en">EN</option>
+      </select>
       <div class="notif-wrap">
         <button class="icon-btn" id="bell-btn" title="Notifications">
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
@@ -1016,27 +1213,36 @@
   </div>
 
   <!-- COUNTRY TABS (static; render() toggles .active and updates counts) -->
-  <div class="country-tabs" id="country-tabs">
-    <button class="country-tab" data-country="BR">
-      <span class="flag">🇧🇷</span>
-      <span class="nm">Brasil</span>
-      <span class="ct" data-ct="BR">—</span>
-    </button>
-    <button class="country-tab" data-country="AR">
-      <span class="flag">🇦🇷</span>
-      <span class="nm">Argentina</span>
-      <span class="ct" data-ct="AR">—</span>
-    </button>
-    <button class="country-tab" data-country="PY">
-      <span class="flag">🇵🇾</span>
-      <span class="nm">Paraguay</span>
-      <span class="ct" data-ct="PY">—</span>
-    </button>
+  <!-- Wrapper enables horizontal-scroll with right-edge fade indicator on mobile -->
+  <div class="country-tabs-wrap">
+    <div class="country-tabs" id="country-tabs">
+      <button class="country-tab" data-country="BR">
+        <span class="flag">🇧🇷</span>
+        <span class="nm">Brasil</span>
+        <span class="ct" data-ct="BR">—</span>
+      </button>
+      <button class="country-tab" data-country="AR">
+        <span class="flag">🇦🇷</span>
+        <span class="nm">Argentina</span>
+        <span class="ct" data-ct="AR">—</span>
+      </button>
+      <button class="country-tab" data-country="PY">
+        <span class="flag">🇵🇾</span>
+        <span class="nm">Paraguay</span>
+        <span class="ct" data-ct="PY">—</span>
+      </button>
+    </div>
   </div>
 
   <!-- BODY -->
   <div class="body">
-    <div class="sidebar">
+    <!-- Scrim: dark overlay shown behind the sidebar on mobile -->
+    <div class="scrim" id="scrim" hidden></div>
+
+    <aside class="sidebar" id="sidebar" aria-label="Main navigation">
+      <button class="sidebar-close" id="sidebar-close" aria-label="Close menu">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
       <div class="side-grp" id="t-modules">Módulos</div>
       <button class="side-item active" data-mod="panel">
         <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
@@ -1056,7 +1262,7 @@
         <strong>Sekura</strong> v3.2 · powered by sekura.io<br>
         © 2026
       </div>
-    </div>
+    </aside>
 
     <!-- MAIN -->
     <div class="main" id="main"></div>
@@ -3341,9 +3547,19 @@ function render() {
   // sidebar / lang active states
   $$('.side-item').forEach(b => b.classList.toggle('active', b.dataset.mod === state.module));
   $$('#lang button').forEach(b => b.classList.toggle('active', b.dataset.l === state.lang));
+  // Mobile lang select: keep in sync with state.lang
+  const lm = $('#lang-mobile');
+  if (lm && lm.value !== state.lang) lm.value = state.lang;
 
   // country tabs: active state + per-country count badge
-  $$('.country-tab').forEach(b => b.classList.toggle('active', b.dataset.country === state.country));
+  $$('.country-tab').forEach(b => {
+    const isActive = b.dataset.country === state.country;
+    b.classList.toggle('active', isActive);
+    // On mobile, auto-scroll the active tab into view (smooth, no horizontal jump).
+    if (isActive && window.matchMedia('(max-width: 1023px)').matches) {
+      try { b.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }); } catch (_) {}
+    }
+  });
   $$('[data-ct]').forEach(el => {
     const c = el.dataset.ct;
     el.textContent = (DATASETS[c].displayTotal || DATASETS[c].props.length).toLocaleString(state.lang === 'en' ? 'en-US' : 'es-AR');
@@ -4503,11 +4719,13 @@ function attachHandlers() {
     state.module = b.dataset.mod;
     state.scannerView = 'input';
     closeNotifDropdown();
+    closeSidebar();        // close mobile sidebar overlay after module change
     render();
   }));
   $$('[data-country]').forEach(el => el.addEventListener('click', () => {
     setCountry(el.dataset.country);
     closeNotifDropdown();
+    closeSidebar();        // ditto for country switch from inside sidebar
     render();
   }));
   // Bell button → toggle notification dropdown.
@@ -4700,7 +4918,47 @@ function attachHandlers() {
     state.lang = b.dataset.l;
     render();
   }));
+  // Mobile language picker (native <select>)
+  const langMobile = $('#lang-mobile');
+  if (langMobile) langMobile.addEventListener('change', (e) => {
+    state.lang = e.target.value;
+    render();
+  });
 }
+
+// =====================================================================
+// MOBILE SIDEBAR OVERLAY — open / close / scrim / Esc / outside click.
+// Registered ONCE at boot (not in attachHandlers, which re-runs each render).
+// =====================================================================
+function openSidebar() {
+  const sb = $('#sidebar'); const sc = $('#scrim'); const ham = $('#hamburger');
+  if (!sb) return;
+  sb.classList.add('is-open');
+  if (sc) { sc.hidden = false; sc.classList.add('is-active'); }
+  if (ham) ham.setAttribute('aria-expanded', 'true');
+  document.body.classList.add('is-locked');
+}
+function closeSidebar() {
+  const sb = $('#sidebar'); const sc = $('#scrim'); const ham = $('#hamburger');
+  if (!sb) return;
+  sb.classList.remove('is-open');
+  if (sc) { sc.classList.remove('is-active'); setTimeout(() => { sc.hidden = true; }, 240); }
+  if (ham) ham.setAttribute('aria-expanded', 'false');
+  document.body.classList.remove('is-locked');
+}
+
+const __ham = document.getElementById('hamburger');
+if (__ham) __ham.addEventListener('click', openSidebar);
+const __sbClose = document.getElementById('sidebar-close');
+if (__sbClose) __sbClose.addEventListener('click', closeSidebar);
+const __scrim = document.getElementById('scrim');
+if (__scrim) __scrim.addEventListener('click', closeSidebar);
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    const sb = document.getElementById('sidebar');
+    if (sb && sb.classList.contains('is-open')) closeSidebar();
+  }
+});
 
 // Boot: try to restore from URL hash, fall back to BR / panel.
 setCountry('BR');
