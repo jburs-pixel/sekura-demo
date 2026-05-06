@@ -1206,8 +1206,8 @@
         <div class="notif-dropdown" id="notif-dropdown" hidden></div>
       </div>
       <div class="user-chip">
-        <div class="avatar">JB</div>
-        <div class="nm">Joaquín Burs</div>
+        <div class="avatar">JP</div>
+        <div class="nm">Juan Perez</div>
       </div>
     </div>
   </div>
@@ -1250,7 +1250,7 @@
       </button>
       <button class="side-item" data-mod="scanner">
         <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-        <span id="t-scanner">Scanner</span>
+        <span id="t-scanner">Auditor</span>
       </button>
       <button class="side-item" data-mod="monitor">
         <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -1275,8 +1275,8 @@
 // ===========================================================================
 const I18N = {
   pt: {
-    modules: 'Módulos', panel: 'Painel de Controle', scanner: 'Scanner', monitor: 'Monitoramento Sekura',
-    welcome: 'Bem-vindo, Joaquín.', tagline: 'Monitoramento de garantias rurais',
+    modules: 'Módulos', panel: 'Painel de Controle', scanner: 'Auditor', monitor: 'Monitoramento Sekura',
+    welcome: 'Bem-vindo, Juan.', tagline: 'Monitoramento de garantias rurais',
     newQuery: 'Nova consulta', filters: 'Filtros', export: 'Exportar',
     portfolio: 'Carteira total', cars: 'Total CARs', alerts: 'Alertas ativos', exposure: 'Exposição',
     geoTitle: 'Distribuição geográfica', geoSub: 'Por região', detTitle: 'Tipos de detecção', detSub: 'Últimas 12 semanas',
@@ -1286,15 +1286,15 @@ const I18N = {
     all: 'Todos', ok: 'Conforme', breach2: 'Não conforme', watch: 'Observação',
     page: 'Pág.', of: 'de', records: 'registros', prev: 'Anterior', next: 'Próximo',
     showing: 'Mostrando',
-    scannerSub: 'Insira um CNPJ, CPF, código CAR ou faça upload de Notas Fiscais para consultar o monitoramento.',
+    scannerSub: 'Insira um CNPJ, CPF ou código CAR para consultar o monitoramento.',
     consult: 'Consultar', searching: 'Buscando…', sample: 'Dados de teste',
     cnpjPh: '00.000.000/0000-00', cpfPh: '000.000.000-00', carPh: 'UF-0000000-XXXXXXXX...',
     drag: 'Arraste seus arquivos aqui',
     or: 'ou clique para selecionar', dragNF: 'PDF, ZIP — até 25MB', dragArq: 'PDF, CSV — até 25MB',
     monitorEmpty: 'Nenhum CAR consultado ainda',
-    monitorEmpty2: 'Use o Painel de Controle ou o Scanner para selecionar um CAR e começar o monitoramento.',
-    goPanel: 'Ir ao Painel', goScanner: 'Abrir Scanner',
-    laudo: 'Laudo técnico', moreOpts: 'Mais opções', viewSicar: 'Visualizar no SICAR',
+    monitorEmpty2: 'Use o Painel de Controle ou o Auditor para selecionar um CAR e começar o monitoramento.',
+    goPanel: 'Ir ao Painel', goScanner: 'Abrir Auditor',
+    laudo: 'Informe técnico', moreOpts: 'Mais opções', viewSicar: 'Visualizar no SICAR',
     audit: 'Auditoria regulatória', geoms: 'Geometrias', overlap: 'Sobreposição', monitoring: 'Monitoramento',
     hectares: 'Hectares', agArea: 'Área agrícola', unprodArea: 'Área improdutiva',
     muniUf: 'Município/UF', statusV: 'Status', tipo: 'Tipo', activo: 'Ativo', imovel: 'Imóvel rural',
@@ -1309,11 +1309,11 @@ const I18N = {
     deforestation: 'Desmatamento', fire: 'Foco de calor', embargo: 'Embargo IBAMA', overlap2: 'Sobreposição',
     download: 'Baixar imagem', cropArea: 'Tipo de área', pct: '%',
     consolidated: 'Área consolidada', unproductive: 'Área improdutiva', total: 'Total',
-    backScan: 'Voltar ao Scanner',
+    backScan: 'Voltar ao Auditor',
   },
   es: {
-    modules: 'Módulos', panel: 'Panel de control', scanner: 'Scanner', monitor: 'Monitoreo Sekura',
-    welcome: 'Bienvenido, Joaquín.', tagline: 'Monitoreo de garantías rurales',
+    modules: 'Módulos', panel: 'Panel de control', scanner: 'Auditor', monitor: 'Monitoreo Sekura',
+    welcome: 'Bienvenido, Juan.', tagline: 'Monitoreo de garantías rurales',
     newQuery: 'Nueva consulta', filters: 'Filtros', export: 'Exportar',
     portfolio: 'Cartera total', cars: 'Total CARs', alerts: 'Alertas activas', exposure: 'Exposición',
     geoTitle: 'Distribución geográfica', geoSub: 'Por región', detTitle: 'Tipos de detección', detSub: 'Últimas 12 semanas',
@@ -1323,15 +1323,15 @@ const I18N = {
     all: 'Todos', ok: 'Conforme', breach2: 'No conforme', watch: 'Observación',
     page: 'Pág.', of: 'de', records: 'registros', prev: 'Anterior', next: 'Siguiente',
     showing: 'Mostrando',
-    scannerSub: 'Ingresa un CNPJ, CPF, código CAR o sube Notas Fiscales para consultar el monitoreo.',
+    scannerSub: 'Ingresá un CNPJ, CPF o código CAR para consultar el monitoreo.',
     consult: 'Consultar', searching: 'Buscando…', sample: 'Datos de prueba',
     cnpjPh: '00.000.000/0000-00', cpfPh: '000.000.000-00', carPh: 'UF-0000000-XXXXXXXX...',
     drag: 'Arrastra tus archivos aquí',
     or: 'o haz clic para seleccionar', dragNF: 'PDF, ZIP — hasta 25MB', dragArq: 'PDF, CSV — hasta 25MB',
     monitorEmpty: 'Ningún CAR consultado aún',
-    monitorEmpty2: 'Usa el Panel de Control o el Scanner para seleccionar un CAR y comenzar el monitoreo.',
-    goPanel: 'Ir al Panel', goScanner: 'Abrir Scanner',
-    laudo: 'Laudo técnico', moreOpts: 'Más opciones', viewSicar: 'Ver en SICAR',
+    monitorEmpty2: 'Usa el Panel de Control o el Auditor para seleccionar un CAR y comenzar el monitoreo.',
+    goPanel: 'Ir al Panel', goScanner: 'Abrir Auditor',
+    laudo: 'Informe técnico', moreOpts: 'Más opciones', viewSicar: 'Ver en SICAR',
     audit: 'Auditoría regulatoria', geoms: 'Geometrías', overlap: 'Solapamiento', monitoring: 'Monitoreo',
     hectares: 'Hectáreas', agArea: 'Área agrícola', unprodArea: 'Área improductiva',
     muniUf: 'Municipio/UF', statusV: 'Estado', tipo: 'Tipo', activo: 'Activo', imovel: 'Inmueble rural',
@@ -1346,11 +1346,11 @@ const I18N = {
     deforestation: 'Deforestación', fire: 'Foco de calor', embargo: 'Embargo IBAMA', overlap2: 'Solapamiento',
     download: 'Descargar imagen', cropArea: 'Tipo de área', pct: '%',
     consolidated: 'Área consolidada', unproductive: 'Área improductiva', total: 'Total',
-    backScan: 'Volver al Scanner',
+    backScan: 'Volver al Auditor',
   },
   en: {
-    modules: 'Modules', panel: 'Control Panel', scanner: 'Scanner', monitor: 'Sekura Monitoring',
-    welcome: 'Welcome, Joaquín.', tagline: 'Rural collateral monitoring',
+    modules: 'Modules', panel: 'Control Panel', scanner: 'Auditor', monitor: 'Sekura Monitoring',
+    welcome: 'Welcome, Juan.', tagline: 'Rural collateral monitoring',
     newQuery: 'New query', filters: 'Filters', export: 'Export',
     portfolio: 'Total portfolio', cars: 'Total CARs', alerts: 'Active alerts', exposure: 'Exposure',
     geoTitle: 'Geographic distribution', geoSub: 'By region', detTitle: 'Detection types', detSub: 'Last 12 weeks',
@@ -1360,14 +1360,14 @@ const I18N = {
     all: 'All', ok: 'Compliant', breach2: 'Non-compliant', watch: 'Watch',
     page: 'Page', of: 'of', records: 'records', prev: 'Previous', next: 'Next',
     showing: 'Showing',
-    scannerSub: 'Enter a CNPJ, CPF, CAR code or upload invoices to query monitoring.',
+    scannerSub: 'Enter a CNPJ, CPF or CAR code to query monitoring.',
     consult: 'Query', searching: 'Searching…', sample: 'Sample data',
     cnpjPh: '00.000.000/0000-00', cpfPh: '000.000.000-00', carPh: 'UF-0000000-XXXXXXXX...',
     drag: 'Drag files here',
     or: 'or click to select', dragNF: 'PDF, ZIP — up to 25MB', dragArq: 'PDF, CSV — up to 25MB',
     monitorEmpty: 'No CAR consulted yet',
-    monitorEmpty2: 'Use the Control Panel or Scanner to select a CAR and start monitoring.',
-    goPanel: 'Go to Panel', goScanner: 'Open Scanner',
+    monitorEmpty2: 'Use the Control Panel or Auditor to select a CAR and start monitoring.',
+    goPanel: 'Go to Panel', goScanner: 'Open Auditor',
     laudo: 'Technical report', moreOpts: 'More options', viewSicar: 'View on SICAR',
     audit: 'Regulatory audit', geoms: 'Geometries', overlap: 'Overlap', monitoring: 'Monitoring',
     hectares: 'Hectares', agArea: 'Agricultural area', unprodArea: 'Unproductive area',
@@ -1383,7 +1383,7 @@ const I18N = {
     deforestation: 'Deforestation', fire: 'Heat anomaly', embargo: 'IBAMA embargo', overlap2: 'Overlap',
     download: 'Download image', cropArea: 'Area type', pct: '%',
     consolidated: 'Consolidated area', unproductive: 'Unproductive area', total: 'Total',
-    backScan: 'Back to Scanner',
+    backScan: 'Back to Auditor',
   }
 };
 
@@ -2869,7 +2869,7 @@ function buildLaudoHTML(carId, lang, country) {
 <html lang="${lang}">
 <head>
 <meta charset="UTF-8">
-<title>${T('Laudo Técnico','Informe Técnico','Technical Report')} — ${d.car}</title>
+<title>${T('Informe Técnico','Informe Técnico','Technical Report')} — ${d.car}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -3096,7 +3096,7 @@ function buildLaudoHTML(carId, lang, country) {
 <body>
 
 <div class="toolbar">
-  <div class="meta">${T('Laudo Técnico','Informe Técnico','Technical Report')} · ${d.car}</div>
+  <div class="meta">${T('Informe Técnico','Informe Técnico','Technical Report')} · ${d.car}</div>
   <button onclick="window.print()">🖨 ${T('Imprimir / Exportar PDF','Imprimir / Exportar PDF','Print / Export PDF')}</button>
 </div>
 
@@ -3105,7 +3105,7 @@ function buildLaudoHTML(carId, lang, country) {
   <div class="laudo-header">
     <div class="laudo-logo">SK</div>
     <div>
-      <h1>${T('LAUDO TÉCNICO — MONITORAMENTO GEOESPACIAL','INFORME TÉCNICO — MONITOREO GEOESPACIAL','TECHNICAL REPORT — GEOSPATIAL MONITORING')}</h1>
+      <h1>${T('INFORME TÉCNICO — MONITORAMENTO GEOESPACIAL','INFORME TÉCNICO — MONITOREO GEOESPACIAL','TECHNICAL REPORT — GEOSPATIAL MONITORING')}</h1>
       <div class="sub">Sekura — ${T('Plataforma de Compliance Ambiental Rural','Plataforma de Cumplimiento Ambiental Rural','Rural Environmental Compliance Platform')}</div>
     </div>
     <div class="right">
@@ -3232,7 +3232,7 @@ function buildLaudoHTML(carId, lang, country) {
   <div class="laudo-header">
     <div class="laudo-logo">SK</div>
     <div>
-      <h1>${T('LAUDO TÉCNICO — MONITORAMENTO GEOESPACIAL','INFORME TÉCNICO — MONITOREO GEOESPACIAL','TECHNICAL REPORT — GEOSPATIAL MONITORING')}</h1>
+      <h1>${T('INFORME TÉCNICO — MONITORAMENTO GEOESPACIAL','INFORME TÉCNICO — MONITOREO GEOESPACIAL','TECHNICAL REPORT — GEOSPATIAL MONITORING')}</h1>
       <div class="sub">Sekura — ${T('Plataforma de Compliance Ambiental Rural','Plataforma de Cumplimiento Ambiental Rural','Rural Environmental Compliance Platform')}</div>
     </div>
     <div class="right">
@@ -3308,7 +3308,7 @@ function buildLaudoHTML(carId, lang, country) {
   <div class="laudo-header">
     <div class="laudo-logo">SK</div>
     <div>
-      <h1>${T('LAUDO TÉCNICO — MONITORAMENTO GEOESPACIAL','INFORME TÉCNICO — MONITOREO GEOESPACIAL','TECHNICAL REPORT — GEOSPATIAL MONITORING')}</h1>
+      <h1>${T('INFORME TÉCNICO — MONITORAMENTO GEOESPACIAL','INFORME TÉCNICO — MONITOREO GEOESPACIAL','TECHNICAL REPORT — GEOSPATIAL MONITORING')}</h1>
       <div class="sub">Sekura — ${T('Plataforma de Compliance Ambiental Rural','Plataforma de Cumplimiento Ambiental Rural','Rural Environmental Compliance Platform')}</div>
     </div>
     <div class="right">
@@ -3928,8 +3928,6 @@ function renderScanner() {
     { id: 'CAR',  label: 'CAR' },
     { id: 'CNPJ', label: 'CNPJ' },
     { id: 'CPF',  label: 'CPF' },
-    { id: 'NF',   label: state.lang === 'en' ? 'Invoice' : 'Nota Fiscal' },
-    { id: 'ARQ',  label: state.lang === 'en' ? 'Files' : 'Arquivos' },
   ];
 
   return `
@@ -4026,16 +4024,7 @@ function renderScannerTabBody() {
       </div>
     `;
   }
-  if (tab === 'NF' || tab === 'ARQ') {
-    const sub = tab === 'NF' ? t.dragNF : t.dragArq;
-    return `
-      <div class="dropzone" id="dz">
-        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-        <div class="t">${t.drag}</div>
-        <div class="s">${t.or} · ${sub}</div>
-      </div>
-    `;
-  }
+  // (Nota Fiscal / Arquivos tabs removed in feedback-cleanup-1; only CAR/CNPJ/CPF.)
 }
 
 function renderEntityView() {
@@ -4146,7 +4135,6 @@ function renderCarDetail(carId) {
           ` : ''}
         </div>
         <div class="actions">
-          <button class="btn btn-ghost"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>${t.moreOpts}</button>
           <button class="btn btn-accent" data-laudo="${d.car}"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>${t.laudo}</button>
         </div>
       </div>
@@ -4178,8 +4166,6 @@ function renderCarDetail(carId) {
 
     <div class="subtab-bar">
       <button data-sub="audit" class="${state.carSubtab === 'audit' ? 'active' : ''}">${t.audit}</button>
-      <button data-sub="geoms" class="${state.carSubtab === 'geoms' ? 'active' : ''}">${t.geoms}</button>
-      <button data-sub="overlap" class="${state.carSubtab === 'overlap' ? 'active' : ''}">${t.overlap}</button>
       <button data-sub="monitoring" class="${state.carSubtab === 'monitoring' ? 'active' : ''}">${t.monitoring}</button>
     </div>
 
@@ -4189,6 +4175,11 @@ function renderCarDetail(carId) {
 
 function renderCarSubtab(d) {
   const t = T();
+  // Defensive: if state was loaded from a URL/cache with a removed subtab id
+  // (geoms / overlap were removed in feedback-cleanup-1), normalize to 'audit'.
+  if (state.carSubtab !== 'audit' && state.carSubtab !== 'monitoring') {
+    state.carSubtab = 'audit';
+  }
   if (state.carSubtab === 'audit') {
     const lblShow = state.lang === 'en' ? 'Show details' : (state.lang === 'es' ? 'Ver detalle' : 'Ver detalhe');
     const lblHide = state.lang === 'en' ? 'Hide details' : (state.lang === 'es' ? 'Ocultar detalle' : 'Ocultar detalhe');
@@ -4230,57 +4221,9 @@ function renderCarSubtab(d) {
     }).join('');
   }
 
-  if (state.carSubtab === 'geoms') {
-    return `
-      <div class="grid-2">
-        <div class="card">
-          <div class="card-head"><div><h3>${T().talhoes}</h3></div></div>
-          <div class="card-body">${renderTalhoes(d)}</div>
-        </div>
-        <div class="card">
-          <div class="card-head"><div><h3>${T().cropArea}</h3></div></div>
-          <div style="overflow:auto">
-            <table class="t">
-              <thead><tr><th>${T().cropArea}</th><th class="right">${T().pct}</th><th class="right">ha</th></tr></thead>
-              <tbody>
-                ${d.geometries.map(g => `
-                  <tr><td class="strong">${T()[g.tipo]}</td><td class="right">${fmt.pct(g.pct)}</td><td class="right strong">${g.ha.toFixed(2)} ha</td></tr>
-                `).join('')}
-                <tr style="background:var(--surface2)"><td class="strong">${T().total}</td><td class="right strong">100%</td><td class="right strong">${fmt.int(d.ha)} ha</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <div style="padding:16px 20px;border-top:1px solid var(--border)">
-            <a>↓ ${T().download}</a>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
-  if (state.carSubtab === 'overlap') {
-    return `
-      <div class="card">
-        <div class="card-head"><div><h3>${T().overlap}</h3></div></div>
-        ${d.overlaps.length === 0
-          ? `<div style="padding:48px;text-align:center;color:var(--muted)">${state.lang === 'en' ? 'No overlaps detected.' : (state.lang === 'es' ? 'Sin solapamientos detectados.' : 'Sem sobreposições detectadas.')}</div>`
-          : `<div style="overflow:auto"><table class="t">
-              <thead><tr><th>${T().car}</th><th>${T().muni}</th><th class="right">ha</th><th class="right">${T().pct}</th><th>${T().statusV}</th></tr></thead>
-              <tbody>
-                ${d.overlaps.map(o => `
-                  <tr>
-                    <td><div class="car-cell"><div class="a">${o.car.slice(0, 18)}…</div><div class="b">${o.car.slice(-12)}</div></div></td>
-                    <td>${o.muni}</td>
-                    <td class="right strong">${o.ha} ha</td>
-                    <td class="right">${o.pct}%</td>
-                    <td><span class="badge ${o.status}"><span class="bdot"></span>${o.status === 'breach' ? T().notConf : T().confName}</span></td>
-                  </tr>
-                `).join('')}
-              </tbody>
-            </table></div>`}
-      </div>
-    `;
-  }
+  // Geometrías + Sobreposição subtabs removed in feedback-cleanup-1.
+  // The data is still in d.geometries / d.overlaps but no longer rendered here.
+  // It still appears in the Informe Técnico (PDF report).
 
   if (state.carSubtab === 'monitoring') {
     // Critical alert callout — built from the highest-severity entry in the
